@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Image from 'next/image';
+import VideoOne from '../VideoOne';
 
 export default function HeroTwo() {
   return (
@@ -36,8 +37,8 @@ export default function HeroTwo() {
           fill='url(#0787a7c5-978c-4f66-83c7-11c213f99cb7)'
         />
       </svg>
-      <div className='mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:pt-24 lg:pb-44'>
-        <div className='mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8'>
+      <div className='mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:pt-48 lg:pb-44'>
+        <div className='mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0'>
           <div className='mt-24 sm:mt-32 lg:mt-16'>
             <a href='#' className='inline-flex space-x-6'>
               <span className='rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
@@ -52,8 +53,9 @@ export default function HeroTwo() {
               </span>
             </a>
           </div>
-          <h1 className='mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl'>
-            Advanced Orth Lab San Francisco
+          <h1 className='mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl'>
+            Advanced Orth Lab <br />
+            San Francisco
           </h1>
           {/* <h1 className='mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
             Advanced Orth Lab San Francisco
@@ -72,15 +74,25 @@ export default function HeroTwo() {
               Submit RX Form
             </a> */}
             <Button>Submit RX Form</Button>
-            <a
+            {/* <a
               href='#'
               className='text-sm font-semibold leading-6 text-gray-900'
             >
               Learn more <span aria-hidden='true'>→</span>
-            </a>
+            </a> */}
           </div>
         </div>
-        <div className='mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32'>
+        <div className='mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none'>
+          {/* <Image
+            src='/GG-B2.png'
+            alt='golden gate bridge'
+            width='700'
+            height='500'
+            className='shadow-lg shadow-slate-400'
+          /> */}
+          <div className='lg:mt-16'>
+            <VideoOne />
+          </div>
           {/* <div className='max-w-3xl flex-none sm:max-w-5xl lg:max-w-none'>
             <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
               <img

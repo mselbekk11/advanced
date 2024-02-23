@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import UserNav from './UserNav';
+import Image from 'next/image';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -22,7 +24,10 @@ const navigation = [
 ];
 
 export async function Navbar() {
-  const { isAuthenticated } = getKindeServerSession();
+  const { isAuthenticated, getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  user?.picture;
   // const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -33,7 +38,13 @@ export async function Navbar() {
       >
         <div className='flex lg:flex-1'>
           <Link href='/'>
-            <h1 className='font-bold text-2xl'>Advanced</h1>
+            {/* <Image src='/GG-B.png' alt='logo' width='100' height='50'> */}
+            <Image
+              src='/logo.svg'
+              alt='digital printer'
+              width='200'
+              height='50'
+            />
           </Link>
         </div>
         <div className='flex lg:hidden'>
@@ -59,9 +70,14 @@ export async function Navbar() {
         </div>
         {(await isAuthenticated()) ? (
           <div className='hidden lg:flex lg:flex-1 lg:justify-end gap-x-5'>
-            <LogoutLink>
+            {/* <LogoutLink>
               <Button>Log out</Button>
-            </LogoutLink>
+            </LogoutLink> */}
+            <UserNav
+              email={user?.email as string}
+              image={user?.picture as string}
+              name={user?.given_name as string}
+            />
           </div>
         ) : (
           <div className='hidden lg:flex lg:flex-1 lg:justify-end gap-x-5'>

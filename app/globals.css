@@ -75,11 +75,16 @@
   }
 }
 
-.wallpaper {
-  background-image: url('https://res.cloudinary.com/dtjasyr7k/image/upload/v1708638851/homepage_yw0yeo.jpg');
+/* .wallpaper {
+  background-image: url('https://res.cloudinary.com/dtjasyr7k/image/upload/v1708705940/hero-light_jg8fqs.png');
   background-repeat: no-repeat;
-  /* background-attachment: fixed; */
   background-position: center;
-  background-size: cover; /* Resize the background image to cover the entire container */
-  
+  background-size: cover; 
+} */
+
+.digitalprinting {
+  background-image: url('https://res.cloudinary.com/dtjasyr7k/image/upload/v1708710723/dark-bg_wbjc3t.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover; 
 }
