@@ -41,7 +41,7 @@ export default function Appliances() {
           <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
             What we Offer
           </h2>
-          <p className='mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
+          <p className='mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
             Orthodontic Appliances
           </p>
           <p className='mt-6 text-lg leading-8 text-gray-600'>

@@ -1,16 +1,19 @@
-import Image from 'next/image';
-import Hero from './components/Home/Hero';
+import DigitalPrintingThree from './components/DigitalPrintingThree';
 import Appliances from './components/Home/Appliances';
-import HeroTwo from './components/Home/HeroTwo';
-import DigitalPrinting from './components/Home/digital-printing';
+import DigitalPrintingTwo from './components/Home/DigitalPrintingTwo';
+import Footer from './components/Home/Footer';
+import HeroThree from './components/Home/HeroThree';
+import RxForm from './components/Home/rxform';
 
 export default function Home() {
   return (
     <section>
-      {/* <Hero /> */}
-      <HeroTwo />
+      <HeroThree />
       <Appliances />
-      <DigitalPrinting />
+      {/* <DigitalPrintingTwo /> */}
+      <DigitalPrintingThree />
+      <RxForm />
+      <Footer />
     </section>
   );
 }
