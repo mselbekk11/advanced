@@ -1,7 +1,6 @@
 import DigitalPrintingThree from './components/DigitalPrintingThree';
 import Appliances from './components/Home/Appliances';
 import DigitalPrintingTwo from './components/Home/DigitalPrintingTwo';
-import Footer from './components/Home/Footer';
 import HeroThree from './components/Home/HeroThree';
 import RxForm from './components/Home/rxform';
 
@@ -13,7 +12,6 @@ export default function Home() {
       {/* <DigitalPrintingTwo /> */}
       <DigitalPrintingThree />
       <RxForm />
-      <Footer />
     </section>
   );
 }

@@ -35,7 +35,7 @@ const features = [
 
 export default function Appliances() {
   return (
-    <div className='bg-[#F9FAFB] py-24 sm:py-32'>
+    <div className='bg-[#f1f1f1] py-24 sm:py-32'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
           <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
@@ -50,7 +50,7 @@ export default function Appliances() {
           </p>
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <dl className='grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3'>
+          <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3'>
             {features.map((feature) => (
               <div
                 key={feature.name}
@@ -71,7 +71,7 @@ export default function Appliances() {
             ))}
           </dl>
         </div>
-        <div className='mx-auto max-w-2xl lg:text-center mt-16 sm:mt-20'>
+        <div className='text-center mx-auto max-w-2xl lg:text-center mt-16 sm:mt-20'>
           <Button>View Details</Button>
         </div>
       </div>

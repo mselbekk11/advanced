@@ -2,8 +2,8 @@ import { Button } from '@/components/ui/button';
 
 export default function RxForm() {
   return (
-    <div className='bg-[#F9FAFB] py-24 sm:py-32'>
-      <div className='mx-auto max-w-7xl px-6 lg:px-8'>
+    <div className='bg-[#f1f1f1] py-24 sm:py-32'>
+      <div className='mx-auto max-w-7xl px-8 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
           <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
             Send us your

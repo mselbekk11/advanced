@@ -42,7 +42,7 @@ export async function Navbar() {
             <Image
               src='/logo.svg'
               alt='digital printer'
-              width='200'
+              width='170'
               height='50'
             />
           </Link>

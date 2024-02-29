@@ -4,7 +4,7 @@ const VideoOne = () => {
   return (
     <video
       width='700'
-      height='100%'
+      height='100'
       muted
       autoPlay
       loop

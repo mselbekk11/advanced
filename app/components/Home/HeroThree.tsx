@@ -7,7 +7,7 @@ export default function HeroTwo() {
   return (
     <div className='relative isolate overflow-hidden bg-white wallpaper'>
       <svg
-        className='absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]'
+        className='absolute inset-0 -z-10 h-full w-full stroke-gray-300 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]'
         aria-hidden='true'
       >
         <defs>
@@ -30,7 +30,7 @@ export default function HeroTwo() {
         />
       </svg>
       <div className='mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:pt-48 lg:pb-44 lg:grid lg:grid-cols-12 lg:gap-x-8 lg:px-8'>
-        <div className='mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 px-6 lg:col-span-6 lg:px-0 xl:col-span-6'>
+        <div className='mx-auto lg:mx-0 lg:flex-shrink-0 lg:col-span-6 lg:px-0 xl:col-span-6'>
           <div className='mt-24 sm:mt-32 lg:mt-16'>
             <a href='#' className='inline-flex space-x-6'>
               <span className='rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
@@ -74,7 +74,7 @@ export default function HeroTwo() {
             </a> */}
           </div>
         </div>
-        <div className='mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none px-6 lg:col-span-6 lg:px-0 xl:col-span-6'>
+        <div className='mx-auto mt-16 flex sm:mt-12 sm:p-0 sm:ml-0 sm:mr-0 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none lg:col-span-6 lg:px-0 xl:col-span-6'>
           {/* <Image
             src='/GG-B2.png'
             alt='golden gate bridge'

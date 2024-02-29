@@ -4,9 +4,9 @@ import Image from 'next/image';
 const DigitalPrinting = () => {
   return (
     <>
-      <section className='relative pt-[150px] pb-[110px] lg:pt-[170px] bg-white wallpaper isolate'>
+      <section className='relative py-24 bg-white wallpaper isolate md:px-8 px-8'>
         <svg
-          className='absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]'
+          className='absolute inset-0 -z-10 h-full w-full stroke-gray-300 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]'
           aria-hidden='true'
         >
           <defs>
@@ -75,7 +75,7 @@ const DigitalPrinting = () => {
                     <Image
                       src='/dp-b.png'
                       alt='digital printer'
-                      width='300'
+                      width='250'
                       height='300'
                     />
                   </div>
