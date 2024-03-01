@@ -1,24 +1,42 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
+'use client';
+
+import { Button } from '@/components/ui/button';
 import {
   BuildingOffice2Icon,
   EnvelopeIcon,
   PhoneIcon,
 } from '@heroicons/react/24/outline';
+import { FormEvent, useState } from 'react';
 
-export default function Example() {
+export default function ContactForm() {
+  const [first, setFirst] = useState('');
+  const [last, setLast] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    // console.log('Data', first, last, email, phone, message);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify({
+          first,
+          last,
+          email,
+          phone,
+          message,
+        }),
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    } catch (err: any) {
+      console.log('Err', err);
+    }
+  };
+
   return (
     <div className='relative isolate bg-white'>
       <div className='mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2'>
@@ -56,11 +74,6 @@ export default function Example() {
             <h2 className='text-3xl font-bold tracking-tight text-gray-900'>
               Get in touch
             </h2>
-            <p className='mt-6 text-lg leading-8 text-gray-600'>
-              Proin volutpat consequat porttitor cras nullam gravida at. Orci
-              molestie a eu arcu. Sed ut tincidunt integer elementum id sem.
-              Arcu sed malesuada et magna.
-            </p>
             <dl className='mt-10 space-y-4 text-base leading-7 text-gray-600'>
               <div className='flex gap-x-4'>
                 <dt className='flex-none'>
@@ -70,28 +83,7 @@ export default function Example() {
                     aria-hidden='true'
                   />
                 </dt>
-                <dd>
-                  545 Mavis Island
-                  <br />
-                  Chicago, IL 99191
-                </dd>
-              </div>
-              <div className='flex gap-x-4'>
-                <dt className='flex-none'>
-                  <span className='sr-only'>Telephone</span>
-                  <PhoneIcon
-                    className='h-7 w-6 text-gray-400'
-                    aria-hidden='true'
-                  />
-                </dt>
-                <dd>
-                  <a
-                    className='hover:text-gray-900'
-                    href='tel:+1 (555) 234-5678'
-                  >
-                    +1 (555) 234-5678
-                  </a>
-                </dd>
+                <dd>155 Emirates Street, San Francisco, CA 940132</dd>
               </div>
               <div className='flex gap-x-4'>
                 <dt className='flex-none'>
@@ -106,14 +98,52 @@ export default function Example() {
                     className='hover:text-gray-900'
                     href='mailto:hello@example.com'
                   >
-                    hello@example.com
+                    advancedortholabsf@gmail.com
+                  </a>
+                </dd>
+              </div>
+              <div className='flex gap-x-4'>
+                <dt className='flex-none'>
+                  <span className='sr-only'>Telephone</span>
+                  <PhoneIcon
+                    className='h-7 w-6 text-gray-400'
+                    aria-hidden='true'
+                  />
+                </dt>
+                <dd>
+                  <a
+                    className='hover:text-gray-900'
+                    href='tel:+1 (415) 661-9296'
+                  >
+                    Office: 415-661-9296
+                  </a>
+                </dd>
+              </div>
+              <div className='flex gap-x-4'>
+                <dt className='flex-none'>
+                  <span className='sr-only'>Telephone</span>
+                  <PhoneIcon
+                    className='h-7 w-6 text-gray-400'
+                    aria-hidden='true'
+                  />
+                </dt>
+                <dd>
+                  <a
+                    className='hover:text-gray-900'
+                    href='tel:+1 (415) 370-3344'
+                  >
+                    Mobile: 415-370-3344
                   </a>
                 </dd>
               </div>
             </dl>
           </div>
         </div>
+
+        {/* FORM */}
+
         <form
+          onSubmit={onSubmit}
           action='#'
           method='POST'
           className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'
@@ -130,6 +160,8 @@ export default function Example() {
                 <div className='mt-2.5'>
                   <input
                     type='text'
+                    value={first}
+                    onChange={(e) => setFirst(e.target.value)}
                     name='first-name'
                     id='first-name'
                     autoComplete='given-name'
@@ -137,6 +169,7 @@ export default function Example() {
                   />
                 </div>
               </div>
+
               <div>
                 <label
                   htmlFor='last-name'
@@ -147,6 +180,8 @@ export default function Example() {
                 <div className='mt-2.5'>
                   <input
                     type='text'
+                    value={last}
+                    onChange={(e) => setLast(e.target.value)}
                     name='last-name'
                     id='last-name'
                     autoComplete='family-name'
@@ -154,6 +189,7 @@ export default function Example() {
                   />
                 </div>
               </div>
+
               <div className='sm:col-span-2'>
                 <label
                   htmlFor='email'
@@ -164,6 +200,8 @@ export default function Example() {
                 <div className='mt-2.5'>
                   <input
                     type='email'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     name='email'
                     id='email'
                     autoComplete='email'
@@ -171,6 +209,7 @@ export default function Example() {
                   />
                 </div>
               </div>
+
               <div className='sm:col-span-2'>
                 <label
                   htmlFor='phone-number'
@@ -181,6 +220,8 @@ export default function Example() {
                 <div className='mt-2.5'>
                   <input
                     type='tel'
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     name='phone-number'
                     id='phone-number'
                     autoComplete='tel'
@@ -188,6 +229,7 @@ export default function Example() {
                   />
                 </div>
               </div>
+
               <div className='sm:col-span-2'>
                 <label
                   htmlFor='message'
@@ -198,6 +240,8 @@ export default function Example() {
                 <div className='mt-2.5'>
                   <textarea
                     name='message'
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     id='message'
                     rows={4}
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
@@ -206,13 +250,9 @@ export default function Example() {
                 </div>
               </div>
             </div>
-            <div className='mt-8 flex justify-end'>
-              <button
-                type='submit'
-                className='rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-              >
-                Send messages
-              </button>
+
+            <div className='mt-8 flex lg:justify-end justify-center'>
+              <Button type='submit'>Send message</Button>
             </div>
           </div>
         </form>

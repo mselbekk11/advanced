@@ -1,35 +1,28 @@
 import { Button } from '@/components/ui/button';
-import {
-  ArrowPathIcon,
-  CloudArrowUpIcon,
-  LockClosedIcon,
-} from '@heroicons/react/20/solid';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const features = [
   {
     name: 'Removable Appliances',
-    src: '/1.png',
+    src: '/A.png',
     description:
       'Commodo nec sagittis tortor mauris sed. Turpis tortor quis scelerisque diam id accumsan nullam tempus. Pulvinar etiam lacus volutpat eu. Phasellus praesent ligula sit faucibus.',
     href: '#',
-    icon: CloudArrowUpIcon,
   },
   {
     name: 'Fixed Appliances',
-    src: '/2.png',
+    src: '/B.png',
     description:
       'Pellentesque enim a commodo malesuada turpis eleifend risus. Facilisis donec placerat sapien consequat tempor fermentum nibh.',
     href: '#',
-    icon: LockClosedIcon,
   },
   {
     name: 'TMJ Appliances',
-    src: '/3.png',
+    src: '/C.png',
     description:
       'Pellentesque sit elit congue ante nec amet. Dolor aenean curabitur viverra suspendisse iaculis eget. Nec mollis placerat ultricies euismod ut condimentum.',
     href: '#',
-    icon: ArrowPathIcon,
   },
 ];
 
@@ -49,30 +42,34 @@ export default function Appliances() {
             always at competitive prices
           </p>
         </div>
-        <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3'>
-            {features.map((feature) => (
-              <div
-                key={feature.name}
-                className='flex flex-col bg-[#fff] items-center border-solid border-[#F0F0F0] border-2 rounded-md shadow-lg'
-              >
-                <div className='flex w-full justify-center items-center py-4'>
-                  <Image
-                    src={feature.src}
-                    alt='appliance'
-                    width='194'
-                    height='168'
-                  />
+        <Link href='/appliances'>
+          <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
+            <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3'>
+              {features.map((feature) => (
+                <div
+                  key={feature.name}
+                  className='flex flex-col bg-[#fff] items-center border-solid border-[#DFE4EA] border-2 rounded-md'
+                >
+                  <div className='flex w-full justify-center items-center py-4'>
+                    <Image
+                      src={feature.src}
+                      alt='appliance'
+                      width='194'
+                      height='168'
+                    />
+                  </div>
+                  <div className='flex items-center text-base font-semibold leading-7 text-gray-900 px-4 py-8 border-t-2 border-solid border-[#DFE4EA] w-full justify-center'>
+                    <div>{feature.name}</div>
+                  </div>
                 </div>
-                <div className='flex items-center text-base font-semibold leading-7 text-gray-900 px-4 py-8 border-t-2 border-solid border-[#F0F0F0] w-full justify-center'>
-                  <div>{feature.name}</div>
-                </div>
-              </div>
-            ))}
-          </dl>
-        </div>
+              ))}
+            </dl>
+          </div>
+        </Link>
         <div className='text-center mx-auto max-w-2xl lg:text-center mt-16 sm:mt-20'>
-          <Button>View Details</Button>
+          <Link href='/appliances'>
+            <Button>View Details</Button>
+          </Link>
         </div>
       </div>
     </div>

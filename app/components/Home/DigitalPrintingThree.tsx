@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const DigitalPrinting = () => {
   return (
@@ -43,7 +44,9 @@ const DigitalPrinting = () => {
                   process your digital scans.
                 </p>
                 <div className='mt-10 flex items-center gap-x-6'>
-                  <Button>Learn More</Button>
+                  <Link href='/digital-printing'>
+                    <Button>Learn More</Button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -51,7 +54,7 @@ const DigitalPrinting = () => {
             <div className='w-full px-4 lg:w-1/2'>
               <div className='flex flex-wrap -mx-2 sm:-mx-4 lg:-mx-2 xl:-mx-4'>
                 <div className='w-full px-2 sm:w-1/2 sm:px-4 lg:px-2 xl:px-4'>
-                  <div className='mb-4 sm:mb-8 sm:h-[400px] md:h-[540px] lg:h-[400px] xl:h-[500px] bg-[#AAB1C3] flex items-center justify-center shadow-lg shadow-gray-500'>
+                  <div className='mb-4 sm:mb-8 sm:h-[400px] md:h-[540px] lg:h-[400px] xl:h-[500px] bg-[#3e4966] flex items-center justify-center shadow-lg shadow-gray-500 p-4'>
                     {/* <img
                       src='https://i.ibb.co/8mB6K20/image-01.jpg'
                       alt='about image'
@@ -60,13 +63,13 @@ const DigitalPrinting = () => {
                     <Image
                       src='/dp-a.png'
                       alt='digital printer'
-                      width='250'
+                      width='225'
                       height='500'
                     />
                   </div>
                 </div>
                 <div className='w-full px-2 sm:w-1/2 sm:px-4 lg:px-2 xl:px-4'>
-                  <div className='mb-4 sm:mb-8 sm:h-[220px] md:h-[346px] lg:mb-4 lg:h-[225px] xl:mb-8 xl:h-[310px] bg-[#3E4966] flex items-center justify-center shadow-lg shadow-gray-500'>
+                  <div className='mb-4 sm:mb-8 sm:h-[220px] md:h-[346px] lg:mb-4 lg:h-[225px] xl:mb-8 xl:h-[310px] bg-[#3E4966] flex items-center justify-center shadow-lg shadow-gray-500 p-4'>
                     {/* <img
                       src='https://i.ibb.co/fp6kRJc/image-02.jpg'
                       alt='about image'
@@ -75,23 +78,24 @@ const DigitalPrinting = () => {
                     <Image
                       src='/dp-b.png'
                       alt='digital printer'
-                      width='250'
+                      width='225'
                       height='300'
                     />
                   </div>
-                  <div className='bg-primary relative z-10 mb-4 flex items-center justify-center overflow-hidden py-12 px-6 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8 shadow-lg shadow-gray-500'>
+                  <div className='bg-[#4f4c7f] relative z-10 mb-4 flex items-center justify-center overflow-hidden py-12 px-6 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8 shadow-lg shadow-gray-500'>
                     <div>
                       <span className='block text-5xl font-extrabold text-white'>
                         42
                       </span>
-                      <span className='block text-base font-semibold text-white'>
+                      {/* <span className='block text-base font-semibold text-white'>
                         We have
-                      </span>
+                      </span> */}
                       <span className='block text-base font-medium text-white text-opacity-70'>
                         Years of experience
                       </span>
                     </div>
-                    <div>
+
+                    {/* <div>
                       <span className='absolute top-0 left-0 -z-10'>
                         <svg
                           width='106'
@@ -200,7 +204,7 @@ const DigitalPrinting = () => {
                           </defs>
                         </svg>
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

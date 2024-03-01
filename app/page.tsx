@@ -1,4 +1,4 @@
-import DigitalPrintingThree from './components/DigitalPrintingThree';
+import DigitalPrintingThree from './components/Home/DigitalPrintingThree';
 import Appliances from './components/Home/Appliances';
 import DigitalPrintingTwo from './components/Home/DigitalPrintingTwo';
 import HeroThree from './components/Home/HeroThree';
