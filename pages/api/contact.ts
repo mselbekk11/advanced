@@ -19,9 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     from: 'Contact form <contact@mg.advancedortholabsf.com>',
     to: 'mselbekk11@gmail.com',
     subject: 'New Contact Form!',
-    text: `Hello,
-    You have a new form entry!
-    name: ${first} + ' ' + ${last}
+    text: `You have a new form entry!
+    name: ${first} ${last}
     email: ${email}
     phone: ${phone}
     message: ${message}

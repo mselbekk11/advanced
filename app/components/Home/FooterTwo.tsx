@@ -7,6 +7,8 @@ import {
   PhoneIcon,
 } from '@heroicons/react/24/outline';
 import { FormEvent, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ContactForm() {
   const [first, setFirst] = useState('');
@@ -17,7 +19,10 @@ export default function ContactForm() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // console.log('Data', first, last, email, phone, message);
+    console.log('Data', first, last, email, phone, message);
+
+    toast('Message sent. Thank you for reaching out!');
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -32,6 +37,12 @@ export default function ContactForm() {
           'content-type': 'application/json',
         },
       });
+
+      setFirst('');
+      setLast('');
+      setEmail('');
+      setPhone('');
+      setMessage('');
     } catch (err: any) {
       console.log('Err', err);
     }
@@ -144,6 +155,7 @@ export default function ContactForm() {
 
         <form
           onSubmit={onSubmit}
+          // onClick={notify}
           action='#'
           method='POST'
           className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'
@@ -165,6 +177,7 @@ export default function ContactForm() {
                     name='first-name'
                     id='first-name'
                     autoComplete='given-name'
+                    required
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                 </div>
@@ -185,6 +198,7 @@ export default function ContactForm() {
                     name='last-name'
                     id='last-name'
                     autoComplete='family-name'
+                    required
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                 </div>
@@ -205,6 +219,7 @@ export default function ContactForm() {
                     name='email'
                     id='email'
                     autoComplete='email'
+                    required
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                 </div>
@@ -245,7 +260,6 @@ export default function ContactForm() {
                     id='message'
                     rows={4}
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                    defaultValue={''}
                   />
                 </div>
               </div>
@@ -257,6 +271,18 @@ export default function ContactForm() {
           </div>
         </form>
       </div>
+      <ToastContainer
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme='light'
+      />
     </div>
   );
 }

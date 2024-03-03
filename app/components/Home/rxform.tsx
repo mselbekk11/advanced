@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function RxForm() {
   return (
@@ -18,7 +19,9 @@ export default function RxForm() {
           </p>
         </div>
         <div className='mx-auto max-w-2xl lg:text-center mt-6 sm:mt-6'>
-          <Button>Complete Form</Button>
+          <Link href='/rxform'>
+            <Button>Complete Form</Button>
+          </Link>
         </div>
       </div>
     </div>

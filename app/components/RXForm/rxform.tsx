@@ -1,8 +1,72 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
+import { FormEvent, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Rxform() {
+  const [first, setFirst] = useState('');
+  const [last, setLast] = useState('');
+  const [email, setEmail] = useState('');
+
+  const [street, setStreet] = useState('');
+  const [zip, setZip] = useState('');
+  const [city, setCity] = useState('');
+
+  const [phone, setPhone] = useState('');
+  const [patient, setPatient] = useState('');
+  const [date, setDate] = useState('');
+
+  const [appliance, setAppliance] = useState('');
+  const [position, setPosition] = useState('');
+  const [clasp, setClasp] = useState('');
+  const [spring, setSpring] = useState('');
+  const [color, setColor] = useState('');
+
+  const [message, setMessage] = useState('');
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log(
+      'Data',
+      first,
+      last,
+      email,
+      street,
+      zip,
+      city,
+      phone,
+      patient,
+      date,
+      appliance,
+      position,
+      clasp,
+      spring,
+      color,
+      message
+    );
+
+    setFirst('');
+    setLast('');
+    setEmail('');
+    setStreet('');
+    setZip('');
+    setCity('');
+    setPhone('');
+    setPatient('');
+    setDate('');
+    setAppliance('');
+    setPosition('');
+    setClasp('');
+    setSpring('');
+    setColor('');
+    setMessage('');
+
+    toast('Form sent. We will be in touch shortly!');
+  };
+
   return (
     <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-44 lg:pt-48'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
@@ -20,17 +84,17 @@ export default function Rxform() {
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
           <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
-            <div className='bg-white flex items-center justify-center'>
+            <div className='bg-white flex items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg'>
               <Image src='/mouth.png' alt='mouth' width='400' height='500' />
             </div>
-            <form action='#' method='POST'>
-              <div className='p-8 bg-white'>
+            <form action='#' method='POST' onSubmit={onSubmit}>
+              <div className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg'>
                 <div className='bg-white grid grid-cols-1 gap-x-8 gap-y-8 lg:max-w-none lg:grid-cols-2'>
                   <input
+                    value={first}
+                    onChange={(e) => setFirst(e.target.value)}
                     type='text'
                     placeholder='First Name'
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
                     name='firstname'
                     id='firstname'
                     autoComplete='given-name'
@@ -38,6 +102,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={last}
+                    onChange={(e) => setLast(e.target.value)}
                     type='text'
                     placeholder='Last Name'
                     // value={email}
@@ -49,6 +115,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     type='email'
                     name='email'
                     id='email'
@@ -58,6 +126,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
                     type='text'
                     placeholder='Street address'
                     name='street-address'
@@ -67,6 +137,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
                     type='text'
                     placeholder='ZIP or postal code (optional)'
                     name='postal-code'
@@ -75,6 +147,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                     type='text'
                     placeholder='City'
                     name='city'
@@ -84,6 +158,8 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     type='tel'
                     autoComplete='tel'
                     placeholder='Phone'
@@ -91,12 +167,16 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={patient}
+                    onChange={(e) => setPatient(e.target.value)}
                     type='text'
                     placeholder='Patient'
                     required
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
                     type='date'
                     placeholder='Delivery Date'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
@@ -104,6 +184,8 @@ export default function Rxform() {
 
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
+                      value={appliance}
+                      onChange={(e) => setAppliance(e.target.value)}
                       id='appliance'
                       name='appliance'
                       required
@@ -112,54 +194,55 @@ export default function Rxform() {
                       <option value='' disabled selected hidden>
                         Choose an Appliance
                       </option>
-                      <option value='Hawley Retainer'>
+                      <option value='Hawley Retainer U/L'>
                         Hawley Retainer U/L
                       </option>
-                      <option value='Hawley Retainer'>
+                      <option value='Hawley Retainer U/L 2X2 wire'>
                         Hawley Retainer U/L 2X2 wire
                       </option>
                       <option value='Dugonni Retainer'>Dugonni Retainer</option>
                       <option value='wraparound Retainer'>
                         Wraparound Retainer
                       </option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Modified Spring Retainer'>
                         Modified Spring Retainer
                       </option>
-                      <option value='Dugonni Retainer'>Schwarz</option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Schwarz'>Schwarz</option>
+                      <option value='Nance Holding Arch'>
                         Nance Holding Arch
                       </option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Quad Helix Expansion W Arch'>
                         Quad Helix Expansion W Arch
                       </option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Hydrax Rapid Palatal Expander'>
                         Hydrax Rapid Palatal Expander
                       </option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Haas Palatal Seperator'>
                         Haas Palatal Seperator
                       </option>
-                      <option value='Dugonni Retainer'>Bonded R.P.E</option>
-                      <option value='Dugonni Retainer'>Habit Crib</option>
-                      <option value='Dugonni Retainer'>6x6 Lingualarch</option>
-                      <option value='Dugonni Retainer'>Space Maintainer</option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Bonded R.P.E'>Bonded R.P.E</option>
+                      <option value='Habit Crib'>Habit Crib</option>
+                      <option value='6x6 Lingualarch'>6x6 Lingualarch</option>
+                      <option value='Space Maintainer'>Space Maintainer</option>
+                      <option value='Horseshoe Splint (BRUXISM)'>
                         Horseshoe Splint (BRUXISM)
                       </option>
-                      <option value='Dugonni Retainer'>Gelb/Mora</option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Gelb/Mora'>Gelb/Mora</option>
+                      <option value='Invisible Retainer/Essex'>
                         Invisible Retainer/Essex
                       </option>
-                      <option value='Dugonni Retainer'>
+                      <option value='Other - Specify Below'>
                         Other - Specify Below
                       </option>
-                      <option value='Schwartz'>Schwarz</option>
                     </select>
                   </div>
 
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
-                      id='appliance'
-                      name='appliance'
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      id='position'
+                      name='position'
                       required
                       className='w-full'
                     >
@@ -174,8 +257,10 @@ export default function Rxform() {
 
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
-                      id='appliance'
-                      name='appliance'
+                      value={clasp}
+                      onChange={(e) => setClasp(e.target.value)}
+                      id='clasp'
+                      name='clasp'
                       required
                       className='w-full'
                     >
@@ -192,8 +277,10 @@ export default function Rxform() {
                   </div>
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
-                      id='appliance'
-                      name='appliance'
+                      value={spring}
+                      onChange={(e) => setSpring(e.target.value)}
+                      id='spring'
+                      name='spring'
                       required
                       className='w-full'
                     >
@@ -208,30 +295,169 @@ export default function Rxform() {
                   </div>
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
-                      id='appliance'
-                      name='appliance'
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                      id='color'
+                      name='color'
                       required
                       className='w-full'
                     >
                       <option value='' disabled selected hidden>
                         Appliance Color
                       </option>
-                      <option value='Spring'>Any</option>
-                      <option value='Spring'>Red</option>
-                      <option value='Spring'>Blue</option>
-                      <option value='Spring'>Green</option>
-                      <option value='Spring'>Yellow</option>
+                      <option value='Any'>Any</option>
+                      <option value='Wine'>Wine</option>
+                      <option value='Black Cherry'>Black Cherry</option>
+                      <option value='Fluoresent Pink'>Fluoresent Pink</option>
+                      <option value='Raspberry'>Raspberry</option>
+                      <option value='Cranberry'>Cranberry</option>
+                      <option value='Cherry'>Cherry</option>
+                      <option value='Route Beer Brown'>Route Beer Brown</option>
+                      <option value='Persimon'>Persimon</option>
+                      <option value='Tangerine'>Tangerine</option>
+                      <option value='Gold'>Gold</option>
+                      <option value='Amber'>Amber</option>
+
+                      <option value='Any'>Lemon Yellow</option>
+                      <option value='Fluorescent Yellow'>
+                        Fluorescent Yellow
+                      </option>
+                      <option value='Apple Green'>Apple Green</option>
+                      <option value='Grass Green'>Grass Green</option>
+                      <option value='Emerald Green'>Emerald Green</option>
+                      <option value='Teal Green'>Teal Green</option>
+                      <option value='Aqua Blue'>Aqua Blue</option>
+                      <option value='Turqouise'>Turqouise</option>
+                      <option value='Caribbean Blue'>Caribbean Blue</option>
+                      <option value='Ice Blue'>Ice Blue</option>
+                      <option value='Special Med Blue'>Special Med Blue</option>
+
+                      <option value='Saphire Blue'>Saphire Blue</option>
+                      <option value='Colbat Blue'>Colbat Blue</option>
+                      <option value='Light Prutple'>Light Prutple</option>
+                      <option value='Purple'>Purple</option>
+                      <option value='Light Violet'>Light Violet</option>
+                      <option value='Violet'>Violet</option>
+                      <option value='Black Onyx Liquid'>
+                        Black Onyx Liquid
+                      </option>
+                      <option value='Crystal Clear'>Crystal Clear</option>
+                      <option value='Standard Pink'>Standard Pink</option>
+                      <option value='Tinted Clear'>Tinted Clear</option>
+
+                      <option value='Luminary Red'>Luminary Red</option>
+                      <option value='Luminary Pink'>Luminary Pink</option>
+                      <option value='Luminary Coral Red'>
+                        Luminary Coral Red
+                      </option>
+                      <option value='Luminary Orange'>Luminary Orange</option>
+                      <option value='Luminary Blaze Yellow'>
+                        Luminary Blaze Yellow
+                      </option>
+                      <option value='Luminary Yellow'>Luminary Yellow</option>
+                      <option value='Luminary Green'>Luminary Green</option>
+                      <option value='Luminary Teal Green'>
+                        Luminary Teal Green
+                      </option>
+                      <option value='Luminary Blue'>Luminary Blue</option>
+                      <option value='Luminary Blueberry'>
+                        Luminary Blueberry
+                      </option>
+                      <option value='Luminary Purple'>Luminary Purple</option>
+                      <option value='Luminary Chartreuse'>
+                        Luminary Chartreuse
+                      </option>
+
+                      <option value='Royal Red'>Royal Red</option>
+                      <option value='Royal Pink'>Royal Pink</option>
+                      <option value='Royal Coral Red'>Royal Coral Red</option>
+                      <option value='Royal Orange'>Royal Orange</option>
+                      <option value='Royal Blaze Yellow'>
+                        Royal Blaze Yellow
+                      </option>
+                      <option value='Royal Yellow'>Royal Yellow</option>
+                      <option value='Royal Green'>Royal Green</option>
+                      <option value='Royal Teal Green'>Royal Teal Green</option>
+                      <option value='Royal Blue'>Royal Blue</option>
+                      <option value='Royal Blueberry'>Royal Blueberry</option>
+                      <option value='Royal Purple'>Royal Purple</option>
+
+                      <option value='Crimson Red'>Crimson Red</option>
+                      <option value='Candy Apple Red'>Candy Apple Red</option>
+                      <option value='Cameo Pink'>Cameo Pink</option>
+                      <option value='Sunriuse Orange'>Sunriuse Orange</option>
+                      <option value='Mustard Yellow'>Mustard Yellow</option>
+                      <option value='Banana Yellow'>Banana Yellow</option>
+                      <option value='Shamrock Green'>Shamrock Green</option>
+                      <option value='Fern Green'>Fern Green</option>
+                      <option value='Watermelon Green'>Watermelon Green</option>
+                      <option value='Sky Blue'>Sky Blue</option>
+
+                      <option value='Baby Blue'>Baby Blue</option>
+                      <option value='Lapis Blue'>Lapis Blue</option>
+                      <option value='Nautical Blue'>Nautical Blue</option>
+                      <option value='Amethyst'>Amethyst</option>
+                      <option value='Dove Gray'>Dove Gray</option>
+                      <option value='Dolphin Gray'>Dolphin Gray</option>
+                      <option value='Black Opaque'>Black Opaque</option>
+                      <option value='White Opaque'>White Opaque</option>
+                      <option value='Caramel Tan'>Caramel Tan</option>
+                      <option value='Chocolate Brown'>Chocolate Brown</option>
+
+                      <option value='Pink Pearl'>Pink Pearl</option>
+                      <option value='Peach Pearl'>Peach Pearl</option>
+                      <option value='Yellow Pearl'>Yellow Pearl</option>
+                      <option value='Green Pearl'>Green Pearl</option>
+                      <option value='Aqua Pearl'>Aqua Pearl</option>
+                      <option value='Blue Pearl'>Blue Pearl</option>
+                      <option value='Lavander Pearl'>Lavander Pearl</option>
+                      <option value='Lilac Pearl'>Lilac Pearl</option>
+                      <option value='Pearl White'>Pearl White</option>
+                      <option value='Midnight Black'>Midnight Black</option>
+
+                      <option value='Opalescent Sparkle'>
+                        Opalescent Sparkle
+                      </option>
+                      <option value='Silver Sparkle'>Silver Sparkle</option>
+                      <option value='Red Sparkle'>Red Sparkle</option>
+                      <option value='Golden Orange'>Golden Orange</option>
+                      <option value='Copper Sparkle'>Copper Sparkle</option>
+                      <option value='Salmon Pink'>Salmon Pink</option>
+                      <option value='Aztec Gold'>Aztec Gold</option>
+                      <option value='Kiwi Sparkle'>Kiwi Sparkle</option>
+                      <option value='Green Sparkle'>Green Sparkle</option>
+                      <option value='Hunter Green'>Hunter Green</option>
+                      <option value='Aqua Sparkle'>Aqua Sparkle</option>
+                      <option value='Crystal Blue'>Crystal Blue</option>
+                      <option value='Turquoise Sparkle'>
+                        Turquoise Sparkle
+                      </option>
+
+                      <option value='Blue Sparkle'>Blue Sparkle</option>
+                      <option value='Purple Sparkle'>Purple Sparkle</option>
+                      <option value='Lavender'>Lavender</option>
+                      <option value='Fuchsia'>Fuchsia</option>
+                      <option value='Black Sparkle'>Black Sparkle</option>
+                      <option value='Red Hatter'>Red Hatter</option>
+                      <option value='Tutti Frutti'>Tutti Frutti</option>
+                      <option value='Carnival Blue'>Carnival Blue</option>
+                      <option value='Miss Priss'>Miss Priss</option>
+                      <option value='Peacock'>Peacock</option>
+                      <option value='Pastel Rainbow'>Pastel Rainbow</option>
+                      <option value='Disco Rainbow'>Disco Rainbow</option>
+                      <option value='USA Sparkle'>USA Sparkle</option>
                     </select>
                   </div>
                 </div>
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
                   <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     name='message'
                     id='message'
                     placeholder='Additional Information'
                     rows={4}
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                    defaultValue={''}
                   />
                 </div>
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
@@ -242,6 +468,18 @@ export default function Rxform() {
           </dl>
         </div>
       </div>
+      <ToastContainer
+        position='top-right'
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme='light'
+      />
     </div>
   );
 }
