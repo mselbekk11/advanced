@@ -38,7 +38,7 @@ export function NavbarTwo() {
       >
         <div className='flex lg:flex-1'>
           <Link href='/'>
-            <Image src='/logo.svg' alt='logo' width='170' height='50' />
+            <Image src='/logo2.svg' alt='logo' width='170' height='50' />
           </Link>
         </div>
         <div className='flex lg:hidden'>
@@ -82,7 +82,7 @@ export function NavbarTwo() {
           <div className='flex items-center justify-between'>
             <Link href='/'>
               {/* <h1 className='font-bold text-2xl'>Advanced</h1> */}
-              <Image src='/logo.svg' alt='logo' width='170' height='50' />
+              <Image src='/logo2.svg' alt='logo' width='170' height='50' />
             </Link>
             <button
               type='button'

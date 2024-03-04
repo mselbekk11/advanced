@@ -36,6 +36,8 @@ const Referrals = () => {
                 <div className='flex flex-col lg:h-full p-4 border-b-2 lg:border-b-0 lg:border-r-2 border-solid border-[#DFE4EA] '>
                   <p>Image Orthodontics</p>
                   <p>Choice Care</p>
+                  <p>Children&#39;s Choice Dental Care</p>
+                  <p>Premier Orthodontics</p>
                   <p>Axelrode Orthodontics</p>
                   <p>Dr. Scott Chong DDS, MS</p>
                   <p>Dr. Charlenne Rocha DDS, MSD</p>
@@ -43,11 +45,11 @@ const Referrals = () => {
                   <p>Dr. Bella Shen Garnett DDS, MS</p>
                   <p>Dr. Elizabeth Ubaldo DDS</p>
                   <p>Dr. Glen Young DDS</p>
-                  <p>Dr. Rodney Lee DDS</p>
-                  <p>Dr. Scott Lebus DDS, MS</p>
                 </div>
 
                 <div className='flex flex-col lg:h-full p-4'>
+                  <p>Dr. Rodney Lee DDS</p>
+                  <p>Dr. Scott Lebus DDS, MS</p>
                   <p>Dr. Winton J. Quock DMD</p>
                   <p>Dr. Yan Kalika DDS, MS</p>
                   <p>Dr. Peter Lee DDS, MS</p>
