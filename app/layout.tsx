@@ -5,6 +5,7 @@ import './globals.css';
 import { NavbarTwo } from './components/NavbarTwo';
 import FooterTwo from './components/Home/FooterTwo';
 import { ToastContainer } from 'react-toastify';
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
         <ToastContainer />
         <NavbarTwo />
         {children}
+        <Analytics />
         <FooterTwo />
       </body>
     </html>
