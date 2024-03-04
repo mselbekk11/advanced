@@ -251,7 +251,7 @@ export default function Rxform() {
                     />
                   </div> */}
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
+                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 placeholder:text-gray-400 sm:text-sm sm:leading-6'>
                     <select
                       value={appliance}
                       onChange={(e) => setAppliance(e.target.value)}
@@ -520,7 +520,9 @@ export default function Rxform() {
                 </div>
 
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-2'>
-                  <label htmlFor='date' className='text-xs p-2'>Pick up date</label>
+                  <label htmlFor='date' className='text-xs p-2'>
+                    Pick up date
+                  </label>
                   <input
                     value={currentDate}
                     onChange={(e) => setDate(e.target.value)}
