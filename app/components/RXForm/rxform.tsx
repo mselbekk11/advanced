@@ -137,14 +137,6 @@ export default function Rxform() {
                     Download Form
                   </Button>
                 </a>
-                <Button
-                  variant='outline'
-                  className='ml-2'
-                  onClick={() => setOpen(true)}
-                >
-                  <Palette className='mr-2 h-4 w-4' />
-                  View Color Chart
-                </Button>
               </div>
             </div>
             <form method='POST' onSubmit={onSubmit}>
@@ -517,6 +509,14 @@ export default function Rxform() {
                       <option value='USA Sparkle'>USA Sparkle</option>
                     </select>
                   </div>
+                  <Button
+                    variant='outline'
+                    className=''
+                    onClick={() => setOpen(true)}
+                  >
+                    <Palette className='mr-2 h-4 w-4' />
+                    View Color Chart
+                  </Button>
                 </div>
 
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-2'>
