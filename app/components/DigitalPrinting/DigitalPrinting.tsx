@@ -56,8 +56,8 @@ const DigitalPrinting = () => {
                   Alternatively now accepting 3-Shape scans by email:
                 </p>
                 <p className='mt-6 text-md leading-8 text-blue-600'>
-                  <a href='mailto:danbudovsky@gmail.com' target='_blank'>
-                    danbudovsky@gmail.com
+                  <a href='mailto:advancedortholabsf@gmail.com' target='_blank'>
+                    advancedortholabsf@gmail.com
                   </a>
                 </p>
                 {/* <div className='mt-10 flex items-center gap-x-6'>
