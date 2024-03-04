@@ -1,5 +1,9 @@
 'use client';
 
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { Download, Palette } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { FormEvent, useState } from 'react';
@@ -8,6 +12,11 @@ import 'react-toastify/dist/ReactToastify.css';
 // import { postData } from '@/app/utils/postData';
 
 export default function Rxform() {
+  let currentDate = new Date().toJSON().slice(0, 10);
+  console.log(currentDate); // "2022-06-17"
+
+  const [open, setOpen] = useState(false);
+
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
   const [email, setEmail] = useState('');
@@ -123,11 +132,17 @@ export default function Rxform() {
                   href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709579163/rx-form_c9eaoh.pdf'
                   target='_blank'
                 >
-                  <Button variant='secondary' className='mr-2'>
+                  <Button variant='outline' className='mr-2'>
+                    <Download className='mr-2 h-4 w-4' />
                     Download Form
                   </Button>
                 </a>
-                <Button variant='secondary' className='ml-2'>
+                <Button
+                  variant='outline'
+                  className='ml-2'
+                  onClick={() => setOpen(true)}
+                >
+                  <Palette className='mr-2 h-4 w-4' />
                   View Color Chart
                 </Button>
               </div>
@@ -224,10 +239,10 @@ export default function Rxform() {
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
-                    value={date}
+                    value={currentDate}
                     onChange={(e) => setDate(e.target.value)}
                     type='date'
-                    placeholder='Delivery Date'
+                    placeholder={currentDate}
                     name='date'
                     id='date'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
@@ -521,6 +536,71 @@ export default function Rxform() {
           </dl>
         </div>
       </div>
+      <Transition.Root show={open} as={Fragment}>
+        <Dialog as='div' className='relative z-10' onClose={setOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter='ease-out duration-300'
+            enterFrom='opacity-0'
+            enterTo='opacity-100'
+            leave='ease-in duration-200'
+            leaveFrom='opacity-100'
+            leaveTo='opacity-0'
+          >
+            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
+          </Transition.Child>
+
+          <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
+            <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+              <Transition.Child
+                as={Fragment}
+                enter='ease-out duration-300'
+                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+                enterTo='opacity-100 translate-y-0 sm:scale-100'
+                leave='ease-in duration-200'
+                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
+                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
+              >
+                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[1000px] sm:p-6'>
+                  <div>
+                    {/* <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100'>
+                      <CheckIcon
+                        className='h-6 w-6 text-green-600'
+                        aria-hidden='true'
+                      />
+                    </div> */}
+                    <div className='text-center'>
+                      <Dialog.Title
+                        as='h3'
+                        className='text-base font-semibold leading-6 text-gray-900'
+                      >
+                        Color Chart
+                      </Dialog.Title>
+                      <div className='mt-2'>
+                        <Image
+                          src='/color-chart.jpeg'
+                          alt='color chart'
+                          width='1000'
+                          height='400'
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className='mt-5 sm:mt-6'>
+                    <Button
+                      type='button'
+                      className='inline-flex w-full justify-center '
+                      onClick={() => setOpen(false)}
+                    >
+                      Go back to RX Form
+                    </Button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </div>
   );
 }
