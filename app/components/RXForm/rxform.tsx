@@ -238,15 +238,18 @@ export default function Rxform() {
                     id='patient'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
-                  <input
-                    value={currentDate}
-                    onChange={(e) => setDate(e.target.value)}
-                    type='date'
-                    placeholder={currentDate}
-                    name='date'
-                    id='date'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
+                  {/* <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
+                    <label htmlFor='date'>Pick up date</label>
+                    <input
+                      value={currentDate}
+                      onChange={(e) => setDate(e.target.value)}
+                      type='date'
+                      placeholder={currentDate}
+                      name='date'
+                      id='date'
+                      className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+                    />
+                  </div> */}
 
                   <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
                     <select
@@ -515,6 +518,20 @@ export default function Rxform() {
                     </select>
                   </div>
                 </div>
+
+                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-2'>
+                  <label htmlFor='date' className='text-xs p-2'>Pick up date</label>
+                  <input
+                    value={currentDate}
+                    onChange={(e) => setDate(e.target.value)}
+                    type='date'
+                    placeholder={currentDate}
+                    name='date'
+                    id='date'
+                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+                  />
+                </div>
+
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
                   <textarea
                     value={message}
