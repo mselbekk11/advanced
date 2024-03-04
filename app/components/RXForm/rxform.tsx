@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { FormEvent, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Rxform() {
@@ -27,8 +27,9 @@ export default function Rxform() {
 
   const [message, setMessage] = useState('');
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     console.log(
       'Data',
       first,
@@ -48,23 +49,53 @@ export default function Rxform() {
       message
     );
 
-    setFirst('');
-    setLast('');
-    setEmail('');
-    setStreet('');
-    setZip('');
-    setCity('');
-    setPhone('');
-    setPatient('');
-    setDate('');
-    setAppliance('');
-    setPosition('');
-    setClasp('');
-    setSpring('');
-    setColor('');
-    setMessage('');
+    try {
+      const res = await fetch('/api/rxform', {
+        method: 'POST',
+        body: JSON.stringify({
+          first,
+          last,
+          email,
+          street,
+          zip,
+          city,
+          phone,
+          patient,
+          date,
+          appliance,
+          position,
+          clasp,
+          spring,
+          color,
+          message,
+        }),
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
 
-    toast('Form sent. We will be in touch shortly!');
+      setFirst('');
+      setLast('');
+      setEmail('');
+      setStreet('');
+      setZip('');
+      setCity('');
+      setPhone('');
+      setPatient('');
+      setDate('');
+      setAppliance('');
+      setPosition('');
+      setClasp('');
+      setSpring('');
+      setColor('');
+      setMessage('');
+    } catch (err: any) {
+      console.log('Err', err);
+    }
+  };
+
+  const showToast = () => {
+    toast.success('Form sent! We will be in touch shortly!');
   };
 
   return (
@@ -461,25 +492,15 @@ export default function Rxform() {
                   />
                 </div>
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <Button type='submit'>Submit</Button>
+                  <Button type='submit' onClick={showToast}>
+                    Submit
+                  </Button>
                 </div>
               </div>
             </form>
           </dl>
         </div>
       </div>
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme='light'
-      />
     </div>
   );
 }

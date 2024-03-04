@@ -7,7 +7,7 @@ import {
   PhoneIcon,
 } from '@heroicons/react/24/outline';
 import { FormEvent, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function ContactForm() {
@@ -20,8 +20,6 @@ export default function ContactForm() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log('Data', first, last, email, phone, message);
-
-    toast('Message sent. Thank you for reaching out!');
 
     try {
       const res = await fetch('/api/contact', {
@@ -46,6 +44,10 @@ export default function ContactForm() {
     } catch (err: any) {
       console.log('Err', err);
     }
+  };
+
+  const showToast = () => {
+    toast.success('Message sent. Thank you for reaching out!');
   };
 
   return (
@@ -266,23 +268,13 @@ export default function ContactForm() {
             </div>
 
             <div className='mt-8 flex lg:justify-end justify-center'>
-              <Button type='submit'>Send message</Button>
+              <Button type='submit' onClick={showToast}>
+                Send message
+              </Button>
             </div>
           </div>
         </form>
       </div>
-      <ToastContainer
-        position='top-right'
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme='light'
-      />
     </div>
   );
 }
