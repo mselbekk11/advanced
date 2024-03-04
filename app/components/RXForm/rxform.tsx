@@ -15,8 +15,6 @@ export default function Rxform() {
   let currentDate = new Date().toJSON().slice(0, 10);
   console.log(currentDate); // "2022-06-17"
 
-  const [open, setOpen] = useState(false);
-
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
   const [email, setEmail] = useState('');
@@ -127,24 +125,25 @@ export default function Rxform() {
           <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
             <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
               <Image src='/mouth.png' alt='mouth' width='400' height='500' />
-              <div className='mt-8'>
+              <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
                 <a
                   href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709579163/rx-form_c9eaoh.pdf'
                   target='_blank'
                 >
-                  <Button variant='outline' className='mr-2'>
+                  <Button variant='outline' className='w-full'>
                     <Download className='mr-2 h-4 w-4' />
                     Download Form
                   </Button>
                 </a>
-                <Button
-                  variant='outline'
-                  className=''
-                  onClick={() => setOpen(true)}
+                <a
+                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709589745/color-chart_hwsnxo.jpg'
+                  target='_blank'
                 >
-                  <Palette className='mr-2 h-4 w-4' />
-                  View Color Chart
-                </Button>
+                  <Button variant='outline' className='w-full'>
+                    <Palette className='mr-2 h-4 w-4' />
+                    View Color Chart
+                  </Button>
+                </a>
               </div>
             </div>
             <form method='POST' onSubmit={onSubmit}>
@@ -557,71 +556,6 @@ export default function Rxform() {
           </dl>
         </div>
       </div>
-      <Transition.Root show={open} as={Fragment}>
-        <Dialog as='div' className='relative z-10' onClose={setOpen}>
-          <Transition.Child
-            as={Fragment}
-            enter='ease-out duration-300'
-            enterFrom='opacity-0'
-            enterTo='opacity-100'
-            leave='ease-in duration-200'
-            leaveFrom='opacity-100'
-            leaveTo='opacity-0'
-          >
-            <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-          </Transition.Child>
-
-          <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
-            <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-              <Transition.Child
-                as={Fragment}
-                enter='ease-out duration-300'
-                enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-                enterTo='opacity-100 translate-y-0 sm:scale-100'
-                leave='ease-in duration-200'
-                leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-                leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              >
-                <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[1000px] sm:p-6'>
-                  <div>
-                    {/* <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100'>
-                      <CheckIcon
-                        className='h-6 w-6 text-green-600'
-                        aria-hidden='true'
-                      />
-                    </div> */}
-                    <div className='text-center'>
-                      <Dialog.Title
-                        as='h3'
-                        className='text-base font-semibold leading-6 text-gray-900'
-                      >
-                        Color Chart
-                      </Dialog.Title>
-                      <div className='mt-2'>
-                        <Image
-                          src='/color-chart.jpeg'
-                          alt='color chart'
-                          width='1000'
-                          height='400'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className='mt-5 sm:mt-6'>
-                    <Button
-                      type='button'
-                      className='inline-flex w-full justify-center '
-                      onClick={() => setOpen(false)}
-                    >
-                      Go back to RX Form
-                    </Button>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
     </div>
   );
 }
