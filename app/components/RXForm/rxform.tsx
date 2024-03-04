@@ -124,7 +124,12 @@ export default function Rxform() {
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
           <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
             <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
-              <Image src='/mouth.png' alt='mouth' width='400' height='500' />
+              <Image
+                src='/mouth.png'
+                alt='teeth diagram'
+                width='400'
+                height='500'
+              />
               <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
                 <a
                   href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709579163/rx-form_c9eaoh.pdf'
