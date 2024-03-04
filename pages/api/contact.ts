@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const messageData = {
     from: 'Contact form <contact@mg.advancedortholabsf.com>',
-    to: 'mselbekk11@gmail.com',
+    to: 'advancedortholabsf@gmail.com',
     subject: 'New Contact Form!',
     text: `You have a new form entry!
     name: ${first} ${last}
