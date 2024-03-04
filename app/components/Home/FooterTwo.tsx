@@ -96,7 +96,7 @@ export default function ContactForm() {
                     aria-hidden='true'
                   />
                 </dt>
-                <dd>155 Emirates Street, San Francisco, CA 940132</dd>
+                <dd>1108 Vicente St Ste 102, San Francisco, CA 94116</dd>
               </div>
               <div className='flex gap-x-4'>
                 <dt className='flex-none'>

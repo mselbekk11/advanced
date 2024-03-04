@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// first,
+// last,
+// email,
+// street,
+// zip,
+// city,
+// phone,
+// patient,
+// date,
+// appliance,
+// position,
+// clasp,
+// spring,
+// color,
+// message,
+
+model rxform {
+  id        String   @id
+  first     String?
+  last      String?
+  email     String   @unique
+  street    String?
+  zip       String?
+  city      String?
+  phone     String?
+  patient   String?
+  date      DateTime
+  appliance String?
+  position  String?
+  clasp     String?
+  spring    String?
+  color     String?
+  message   String?
+}

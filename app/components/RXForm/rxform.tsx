@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+// import { postData } from '@/app/utils/postData';
 
 export default function Rxform() {
   const [first, setFirst] = useState('');
@@ -115,10 +116,23 @@ export default function Rxform() {
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
           <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
-            <div className='bg-white flex items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg'>
+            <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
               <Image src='/mouth.png' alt='mouth' width='400' height='500' />
+              <div className='mt-8'>
+                <a
+                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709579163/rx-form_c9eaoh.pdf'
+                  target='_blank'
+                >
+                  <Button variant='secondary' className='mr-2'>
+                    Download Form
+                  </Button>
+                </a>
+                <Button variant='secondary' className='ml-2'>
+                  View Color Chart
+                </Button>
+              </div>
             </div>
-            <form action='#' method='POST' onSubmit={onSubmit}>
+            <form method='POST' onSubmit={onSubmit}>
               <div className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg'>
                 <div className='bg-white grid grid-cols-1 gap-x-8 gap-y-8 lg:max-w-none lg:grid-cols-2'>
                   <input
@@ -161,7 +175,7 @@ export default function Rxform() {
                     onChange={(e) => setStreet(e.target.value)}
                     type='text'
                     placeholder='Street address'
-                    name='street-address'
+                    name='streetaddress'
                     id='street-address'
                     autoComplete='street-address'
                     required
@@ -172,7 +186,7 @@ export default function Rxform() {
                     onChange={(e) => setZip(e.target.value)}
                     type='text'
                     placeholder='ZIP or postal code (optional)'
-                    name='postal-code'
+                    name='postalcode'
                     id='postal-code'
                     autoComplete='postal-code'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
@@ -195,6 +209,8 @@ export default function Rxform() {
                     autoComplete='tel'
                     placeholder='Phone'
                     required
+                    name='phone'
+                    id='phone'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
@@ -203,6 +219,8 @@ export default function Rxform() {
                     type='text'
                     placeholder='Patient'
                     required
+                    name='patient'
+                    id='patient'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
                   <input
@@ -210,6 +228,8 @@ export default function Rxform() {
                     onChange={(e) => setDate(e.target.value)}
                     type='date'
                     placeholder='Delivery Date'
+                    name='date'
+                    id='date'
                     className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
                   />
 
