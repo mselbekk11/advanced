@@ -13,7 +13,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function Rxform() {
   let currentDate = new Date().toJSON().slice(0, 10);
-  console.log(currentDate); // "2022-06-17"
 
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
