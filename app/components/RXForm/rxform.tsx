@@ -140,7 +140,7 @@ export default function Rxform() {
                   </Button>
                 </a>
                 <a
-                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709589745/color-chart_hwsnxo.jpg'
+                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709604764/303148363_562771318954765_868928507704974109_n_bbg8q1.jpg'
                   target='_blank'
                 >
                   <Button variant='outline' className='w-full'>
