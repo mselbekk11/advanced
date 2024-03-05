@@ -1,5 +1,8 @@
 'use client';
 
+// import supabase from '@/app/config/supabaseClient';
+import { supabase } from '@/app/config/supabaseClient';
+
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Download, Palette } from 'lucide-react';
@@ -13,6 +16,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function Rxform() {
   let currentDate = new Date().toJSON().slice(0, 10);
+
+  console.log(supabase);
 
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
@@ -36,6 +41,33 @@ export default function Rxform() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const { data, error } = await supabase.from('rxform').insert([
+      {
+        first,
+        last,
+        email,
+        street,
+        zip,
+        city,
+        phone,
+        patient,
+        date,
+        appliance,
+        position,
+        clasp,
+        spring,
+        color,
+        message,
+      },
+    ]);
+
+    if (error) {
+      console.log(error);
+    }
+    if (data) {
+      console.log(data);
+    }
 
     console.log(
       'Data',
