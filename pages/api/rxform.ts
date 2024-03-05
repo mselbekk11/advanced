@@ -34,24 +34,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     from: 'RX form <contact@mg.advancedortholabsf.com>',
     to: 'advancedortholabsf@gmail.com',
     subject: 'New RX Form!',
-    text: `You have a new form entry!
-    name: ${first} ${last}
-    email: ${email}
-    phone: ${phone}
-    message: ${message}
-    street: ${street}
-    zip: ${zip}
-    city: ${city}
-    patient: ${patient}
-    date: ${date}
-    phone: ${phone}
-    appliance: ${appliance}
-    position: ${position}
-    clasp: ${clasp}
-    spring: ${spring}
-    color: ${color}
-    message: ${message}
-    `,
+    template: 'rx Form',
+    'h:X-Mailgun-Variables': {first, last, email, phone, street, zip, city, patient, date, appliance, position, clasp, spring, color, message}
+    // text: `You have a new form entry!
+    // name: ${first} ${last}
+    // email: ${email}
+    // phone: ${phone}
+    // street: ${street}
+    // zip: ${zip}
+    // city: ${city}
+    // patient: ${patient}
+    // date: ${date}
+    // appliance: ${appliance}
+    // position: ${position}
+    // clasp: ${clasp}
+    // spring: ${spring}
+    // color: ${color}
+    // message: ${message}
+    // `,
   }
 
   try {
