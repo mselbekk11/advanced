@@ -163,7 +163,7 @@ export default function Rxform() {
               />
               <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
                 <a
-                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709579163/rx-form_c9eaoh.pdf'
+                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1711214427/AOL-PDF4_hn2uee.pdf'
                   target='_blank'
                 >
                   <Button variant='outline' className='w-full'>
@@ -172,7 +172,7 @@ export default function Rxform() {
                   </Button>
                 </a>
                 <a
-                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1711214427/AOL-PDF4_hn2uee.pdf'
+                  href='https://res.cloudinary.com/dtjasyr7k/image/upload/v1709604764/303148363_562771318954765_868928507704974109_n_bbg8q1.jpg'
                   target='_blank'
                 >
                   <Button variant='outline' className='w-full'>
