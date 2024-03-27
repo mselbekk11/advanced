@@ -6,6 +6,7 @@ import { NavbarTwo } from './components/NavbarTwo';
 import FooterTwo from './components/Home/FooterTwo';
 import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Analytics />
         <FooterTwo />
       </body>
+      <Script src='https://scripts.simpleanalyticscdn.com/latest.js' />
     </html>
   );
 }
