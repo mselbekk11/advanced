@@ -11,7 +11,7 @@ const VideoOne = () => {
       playsInline
       className='shadow-lg shadow-gray-500'
     >
-      <source src='https://res.cloudinary.com/dtjasyr7k/video/upload/v1708727592/7f332d8a-a2e9-404a-8cc2-c9bdd98bd6b8_jz8vup.mp4' />
+      <source src='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCSmnt2pI8DImuXGlExPTNg0CnH7yeqf6vaFOk8' />
       Your browser does not support the video tag.
     </video>
   );

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Image from 'next/image';
 import VideoOne from '../VideoOne';
+import Link from 'next/link';
 
 export default function HeroTwo() {
   return (
@@ -65,7 +66,9 @@ export default function HeroTwo() {
             >
               Submit RX Form
             </a> */}
-            <Button>Submit RX Form</Button>
+            <Link href='/rxform'>
+              <Button>Submit RX Form</Button>
+            </Link>
             {/* <a
               href='#'
               className='text-sm font-semibold leading-6 text-gray-900'
