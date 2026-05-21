@@ -47,7 +47,7 @@ export default function HeroTwo() {
             </a>
           </div>
           <h1 className='mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl'>
-            Advanced Orth Lab <br />
+            Advanced Ortho Lab <br />
             San Francisco
           </h1>
           {/* <h1 className='mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
