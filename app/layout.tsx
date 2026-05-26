@@ -31,6 +31,11 @@ export default function RootLayout({
         <Analytics />
         <FooterTwo />
       </body>
+      <Script
+        src='https://www.sensai.co/widget/embed.js'
+        data-chatbot-id='jh73gj33g6f5ct7esyrn1gfz7d87e8m5'
+        strategy='afterInteractive'
+      />
       <Script src='https://scripts.simpleanalyticscdn.com/latest.js' />
     </html>
   );
