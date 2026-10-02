@@ -67,9 +67,13 @@ export const submit = mutation({
       drawing,
       scans: uploads.map(({ pathname, fileName }) => ({ pathname, fileName })),
       ownerEmailStatus: 'pending',
+      doctorEmailStatus: 'pending',
     });
     for (const upload of uploads) await ctx.db.patch(upload._id, { submissionId: id });
+    // Separate actions, so a failed doctor confirmation can't hold up the
+    // owner email (or the other way round).
     await ctx.scheduler.runAfter(0, internal.emails.sendOwnerRxEmail, { submissionId: id });
+    await ctx.scheduler.runAfter(0, internal.emails.sendDoctorRxEmail, { submissionId: id });
     return id;
   },
 });
@@ -110,14 +114,20 @@ export const setScanDetails = internalMutation({
   },
 });
 
-export const setOwnerEmailStatus = internalMutation({
+export const setEmailStatus = internalMutation({
   args: {
     id: v.id('rxSubmissions'),
+    recipient: v.union(v.literal('owner'), v.literal('doctor')),
     status: vEmailStatus,
     emailId: v.optional(v.string()),
     error: v.optional(v.string()),
   },
-  handler: async (ctx, { id, status, emailId, error }) => {
-    await ctx.db.patch(id, { ownerEmailStatus: status, ownerEmailId: emailId, ownerEmailError: error });
+  handler: async (ctx, { id, recipient, status, emailId, error }) => {
+    await ctx.db.patch(
+      id,
+      recipient === 'owner'
+        ? { ownerEmailStatus: status, ownerEmailId: emailId, ownerEmailError: error }
+        : { doctorEmailStatus: status, doctorEmailId: emailId, doctorEmailError: error }
+    );
   },
 });

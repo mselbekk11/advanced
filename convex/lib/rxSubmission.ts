@@ -49,3 +49,7 @@ export const rxFieldLabels: [keyof RxSubmissionInput, string][] = [
 export function ownerRxSubject(input: Pick<RxSubmissionInput, 'patient' | 'last'>) {
   return `New RX: ${input.patient} — Dr. ${input.last}`;
 }
+
+export function doctorRxSubject(input: Pick<RxSubmissionInput, 'patient'>) {
+  return `RX received: ${input.patient} — Advanced Ortho Lab`;
+}

@@ -57,7 +57,13 @@ export default defineSchema({
     ownerEmailStatus: vEmailStatus,
     ownerEmailId: v.optional(v.string()),
     ownerEmailError: v.optional(v.string()),
-  }).index('by_ownerEmailId', ['ownerEmailId']),
+    // Doctor confirmation. Optional because early dev rows predate it.
+    doctorEmailStatus: v.optional(vEmailStatus),
+    doctorEmailId: v.optional(v.string()),
+    doctorEmailError: v.optional(v.string()),
+  })
+    .index('by_ownerEmailId', ['ownerEmailId'])
+    .index('by_doctorEmailId', ['doctorEmailId']),
 
   // Every scan upload token handed out, so submit only accepts our own
   // uploads and the sweep can delete the ones never submitted.
