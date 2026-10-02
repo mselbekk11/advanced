@@ -1,0 +1,61 @@
+/* eslint-disable */
+/**
+ * Generated `api` utility.
+ *
+ * THIS CODE IS AUTOMATICALLY GENERATED.
+ *
+ * To regenerate, run `npx convex dev`.
+ * @module
+ */
+
+import type * as emails from "../emails.js";
+import type * as http from "../http.js";
+import type * as lib_emailRouting from "../lib/emailRouting.js";
+import type * as lib_rxSubmission from "../lib/rxSubmission.js";
+import type * as resend from "../resend.js";
+import type * as rxSubmissions from "../rxSubmissions.js";
+
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
+
+declare const fullApi: ApiFromModules<{
+  emails: typeof emails;
+  http: typeof http;
+  "lib/emailRouting": typeof lib_emailRouting;
+  "lib/rxSubmission": typeof lib_rxSubmission;
+  resend: typeof resend;
+  rxSubmissions: typeof rxSubmissions;
+}>;
+
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
+export declare const api: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "public">
+>;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
+export declare const internal: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "internal">
+>;
+
+export declare const components: {
+  resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+};

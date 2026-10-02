@@ -7,6 +7,7 @@ import FooterTwo from './components/Home/FooterTwo';
 import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
+import { ConvexClientProvider } from './ConvexClientProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,12 +25,14 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={inter.className}>
-        {/* <Navbar /> */}
-        <ToastContainer />
-        <NavbarTwo />
-        {children}
-        <Analytics />
-        <FooterTwo />
+        <ConvexClientProvider>
+          {/* <Navbar /> */}
+          <ToastContainer />
+          <NavbarTwo />
+          {children}
+          <Analytics />
+          <FooterTwo />
+        </ConvexClientProvider>
       </body>
       {/* <Script
         src='https://www.sensai.co/widget/embed.js'

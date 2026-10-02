@@ -1,7 +1,7 @@
 'use client';
 
-// import supabase from '@/app/config/supabaseClient';
-import { supabase } from '@/app/config/supabaseClient';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -12,12 +12,9 @@ import Image from 'next/image';
 import { FormEvent, useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import { postData } from '@/app/utils/postData';
 
 export default function Rxform() {
   let currentDate = new Date().toJSON().slice(0, 10);
-
-  console.log(supabase);
 
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');
@@ -39,102 +36,59 @@ export default function Rxform() {
 
   const [message, setMessage] = useState('');
 
+  const submitRx = useMutation(api.rxSubmissions.submit);
+  const [submitting, setSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setFirst('');
+    setLast('');
+    setEmail('');
+    setStreet('');
+    setZip('');
+    setCity('');
+    setPhone('');
+    setPatient('');
+    setDate('');
+    setAppliance('');
+    setPosition('');
+    setClasp('');
+    setSpring('');
+    setColor('');
+    setMessage('');
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    const { data, error } = await supabase.from('rxform').insert([
-      {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await submitRx({
         first,
         last,
         email,
-        street,
-        zip,
-        city,
         phone,
+        street,
+        city,
+        zip,
         patient,
-        date,
+        deliveryDate: date,
         appliance,
         position,
         clasp,
         spring,
         color,
-        message,
-      },
-    ]);
-
-    if (error) {
-      console.log(error);
-    }
-    if (data) {
-      console.log(data);
-    }
-
-    console.log(
-      'Data',
-      first,
-      last,
-      email,
-      street,
-      zip,
-      city,
-      phone,
-      patient,
-      date,
-      appliance,
-      position,
-      clasp,
-      spring,
-      color,
-      message
-    );
-
-    try {
-      const res = await fetch('/api/rxform', {
-        method: 'POST',
-        body: JSON.stringify({
-          first,
-          last,
-          email,
-          street,
-          zip,
-          city,
-          phone,
-          patient,
-          date,
-          appliance,
-          position,
-          clasp,
-          spring,
-          color,
-          message,
-        }),
-        headers: {
-          'content-type': 'application/json',
-        },
+        instructions: message,
       });
-
-      setFirst('');
-      setLast('');
-      setEmail('');
-      setStreet('');
-      setZip('');
-      setCity('');
-      setPhone('');
-      setPatient('');
-      setDate('');
-      setAppliance('');
-      setPosition('');
-      setClasp('');
-      setSpring('');
-      setColor('');
-      setMessage('');
-    } catch (err: any) {
-      console.log('Err', err);
+      resetForm();
+      toast.success('Form sent! We will be in touch shortly!');
+    } catch (err) {
+      console.error('RX submission failed', err);
+      toast.error(
+        'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.'
+      );
+    } finally {
+      setSubmitting(false);
     }
-  };
-
-  const showToast = () => {
-    toast.success('Form sent! We will be in touch shortly!');
   };
 
   return (
@@ -583,8 +537,8 @@ export default function Rxform() {
                   />
                 </div>
                 <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <Button type='submit' onClick={showToast}>
-                    Submit
+                  <Button type='submit' disabled={submitting}>
+                    {submitting ? 'Sending…' : 'Submit'}
                   </Button>
                 </div>
               </div>

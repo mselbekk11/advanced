@@ -5,6 +5,7 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, ".") },
   },
+  oxc: { jsx: { runtime: "automatic" } },
   test: {
     exclude: ["node_modules", ".next"],
   },
