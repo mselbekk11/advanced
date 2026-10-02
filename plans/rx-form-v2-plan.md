@@ -47,6 +47,27 @@ These decisions apply to every phase:
 
 ---
 
+## Progress & handoff notes
+
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`). **Next: Phase 3.**
+- **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
+- **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
+- **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
+- **Code map:**
+  - Shared option lists: `convex/lib/rxOptions.ts`. Zod schema: `convex/lib/rxSubmission.ts`. Email routing: `convex/lib/emailRouting.ts`.
+  - Submit mutation: `convex/rxSubmissions.ts`. Owner email send: `convex/emails.tsx` (Node action). Resend component plus webhook event handler: `convex/resend.ts` and `convex/http.ts`.
+  - Email templates live in `emails/`. The RX form is `app/components/RXForm/rxform.tsx`.
+- **Gotchas:**
+  - Run vitest via `npm test`; it uses oxc automatic JSX (`vitest.config.mts`).
+  - Add shadcn components with `npx -y shadcn@2.3.0 add <name> -y </dev/null` (Tailwind 3; the CLI hangs without `</dev/null`).
+  - The delivery date uses a native `<input type="date">` rather than shadcn Calendar; react-day-picker v10 is incompatible with shadcn 2.3.0.
+  - Production Vercel project setting is still Node 20.x; `package.json` engines pins 24.x on `v2`.
+  - The local Vercel CLI is logged into a different account than the project owner (`mselbekk11s-projects`), so build logs must come from the user.
+  - **Phase 5:** the Resend component's `sendEmail` uses the batch API, which has **no attachments**. Inline CID images need `resend.sendEmailManually`.
+  - `convex logs` streams forever; don't run it in the foreground.
+
+---
+
 ## Phase 1: Tracer bullet — RX submit → Convex → Resend email on Preview
 
 **User stories**: 33, 34, 37, 44, 45, 46, 52, 53, 54, 55, 56, 58
