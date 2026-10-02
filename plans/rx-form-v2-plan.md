@@ -6,6 +6,7 @@
 
 These decisions apply to every phase:
 
+- **Scan storage (changed in phase 6):** scans go to a **public Vercel Blob store**, not Convex storage, because Convex storage can't serve a file under its own name (see the phase 6 notes). Drawings stay in Convex storage. Submission records stay in Convex.
 - **Branching / environments:**
   - All work happens on a long-lived `v2` branch, deployed as a Vercel Preview. `main` and production stay on Mailgun/Supabase until phase 10.
   - Convex has two deployments: a dev/preview one for v2, and a production one created at cutover.
@@ -49,8 +50,8 @@ These decisions apply to every phase:
 
 ## Progress & handoff notes
 
-- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`). Phase 5 (`23039b2`, arch drawing → Convex storage → inline CID image in the owner email). Phase 6 (scan uploads + owner email Scans section + hourly orphaned-upload sweep). All pushed to `v2`.
-- **Waiting on the developer (manual checks):** Phase 3 callout look on desktop/mobile Preview; Phase 4 `[STAGING] New RX: Layout Check — Dr. Phase4` in Gmail web + mobile; Phase 5 `[STAGING] New RX: Drawing Check — Dr. Phase5` shows the drawing in Gmail without "display images", and drawing with finger/stylus on a phone or tablet doesn't scroll the page. Phase 6: on the Preview, upload a ~200 MB scan in the browser (progress bar, remove, retry after toggling the network off), and check that `[STAGING] New RX: Scan Check — Dr. Phase6` lists 2 scans whose Download links work. **Next: Phase 7.**
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`). Phase 5 (`23039b2`, arch drawing → Convex storage → inline CID image in the owner email). Phase 6 (`ea9ee42` on Convex storage, then moved to Vercel Blob so downloads keep their file names). All pushed to `v2`.
+- **Waiting on the developer (manual checks):** Phase 3 callout look on desktop/mobile Preview; Phase 4 `[STAGING] New RX: Layout Check — Dr. Phase4` in Gmail web + mobile; Phase 5 `[STAGING] New RX: Drawing Check — Dr. Phase5` shows the drawing in Gmail without "display images", and drawing with finger/stylus on a phone or tablet doesn't scroll the page. Phase 6 (Blob): on the Preview, upload a ~200 MB scan in the browser (progress bar, remove, retry after toggling the network off), submit, and check that the email's Download links save as `<name>.stl`/`.ply`. `[STAGING] New RX: Blob Scan Check — Dr. Phase6` (from a script) should list 2 scans with links plus `never-uploaded.stl` marked "Upload missing". **Next: Phase 7.**
 - **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
 - **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
 - **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
@@ -66,9 +67,14 @@ These decisions apply to every phase:
   - The local Vercel CLI is logged into a different account than the project owner (`mselbekk11s-projects`), so build logs must come from the user.
   - The Resend component's `sendEmail` uses the batch API, which has **no attachments**. Owner emails *with* a drawing go through `resend.sendEmailManually` + the `resend` SDK (`attachments[].contentId`); `sendOwnerRxEmail` retries those itself (`MANUAL_RETRY_DELAYS_MS`). Emails without a drawing still use the queued `sendEmail` path.
   - Drawing: `app/components/RXForm/ArchDrawing.tsx` (react-sketch-canvas v8, `eraserMode='stroke'`, exported at 776x906 with the arch background). Rules/constants in `convex/lib/drawing.ts`. Upload URL: `rxSubmissions.generateUploadUrl`.
-  - A throwing mutation rolls back `ctx.storage.delete`, so `submit` can't delete rejected uploads. Instead `convex/storage.ts` `sweepOrphanedUploads` (hourly cron in `convex/crons.ts`) deletes `_storage` files 1–3 days old that no submission references (drawing or scans). This covers rejected, removed and abandoned uploads. The "Remove" button only drops the file from the list.
-  - Scans: rules in `convex/lib/scans.ts`. The browser sets the upload Content-Type from the extension (`.stl` → `model/stl`, `.ply` → `model/x-ply`) because browsers report inconsistent types. The server checks the stored type and size against the file name (`scanUploadProblem`) and takes size/contentType from storage metadata, not the client. UI: `app/components/RXForm/ScanUpload.tsx` (XHR for progress; submit is blocked while uploading or while any upload has failed).
-  - Scan links are `ctx.storage.getUrl` URLs (`https://<deployment>.convex.cloud/api/storage/<uuid>`). They are served with the stored content type and no Content-Disposition, so the downloaded file is named by its UUID rather than the original name; the email shows the real name next to each link. Serving through an HTTP action to fix the name isn't possible (20 MB response limit).
+  - A throwing mutation rolls back `ctx.storage.delete`, so `submit` can't delete a rejected drawing. Instead `convex/storage.ts` `sweepOrphanedUploads` (hourly, `convex/crons.ts`) deletes Convex `_storage` files 1–3 days old that no submission references.
+  - **Why scans moved to Vercel Blob:** Convex storage URLs (`…/api/storage/<uuid>`) don't send a file name, so downloads saved as the bare UUID with no extension. Convex ignores `?filename=`-style params, 404s on a name in the path, and HTTP actions can't stream more than 20 MB, so they can't proxy a 250 MB scan. Blob serves `content-disposition: attachment; filename="<last path segment>"`.
+  - **Blob store:** public store `store_US3X6UpIsyJ0HvFe` (host `us3x6upisyj0hvfe.public.blob.vercel-storage.com`) under `mselbekk11s-projects`, connected to the Vercel project. `BLOB_READ_WRITE_TOKEN` is set in Convex dev env and in `.env.local`. Production cutover (phase 10) needs it in the production Convex deployment too.
+  - **Scan flow:** `ScanUpload.tsx` calls the `scanUploadsNode.createScanUpload` action → it checks name/size (`scanFileProblem`), picks `scans/<uuid>/<sanitised file name>` (`scanPathname`), records it in the `scanUploads` table and returns a Blob client token locked to that pathname, the extension's content type (`.stl` → `model/stl`, `.ply` → `model/x-ply`) and 250 MB. Blob enforces those limits. The browser `put`s with `multipart` above 100 MB and `onUploadProgress`. `submit` only accepts pathnames in `scanUploads` that no submission has claimed, then marks them claimed. `sendOwnerRxEmail` `head()`s each scan for the real size and `downloadUrl`, saves them on the submission (`setScanDetails`), and lists missing ones as "Upload missing".
+  - **Blob client tokens default to a 30-second expiry** (not 1 hour as the docs say); `SCAN_UPLOAD_WINDOW_MS` sets 2 hours.
+  - `scanUploadsNode.sweepOrphanedScans` (hourly) deletes Blob uploads older than a day that no submission claimed (removed, retried or abandoned).
+  - `rxSubmissions.scans` accepts a legacy Convex-storage shape for 3 early dev test rows; clear those rows and drop the union before cutover.
+  - The `spike/` folder in the Blob store holds test files from the spike; delete it from the Blob dashboard.
   - To inspect stored files locally: `npx convex export --include-file-storage --path <zip>`.
   - `convex logs` streams forever; don't run it in the foreground.
   - Email previews: `npm run email` (React Email dev server on http://localhost:3001; `@react-email/ui` pulls its own Next 16/React 19, nested, so the site stays on Next 14/React 18).
@@ -228,7 +234,9 @@ Resend's SDK (6.32) supports inline attachments: `attachments: [{ content, filen
 
 ### Spike result
 
-A 200 MB (209,715,200-byte) file POSTed to a `generateUploadUrl` URL on the dev deployment returned 200 (it took ~4 min on the developer's ~0.9 MB/s uplink). Storage metadata kept `size` and the `Content-Type` sent with the upload (`model/stl`). Its `getUrl` link downloads the full file (200, `model/stl`). No size limit was hit, so no chunking is needed.
+**Convex storage** (first build): a 200 MB (209,715,200-byte) file POSTed to a `generateUploadUrl` URL on the dev deployment returned 200 (it took ~4 min on the developer's ~0.9 MB/s uplink). Storage metadata kept `size` and the `Content-Type` sent with the upload (`model/stl`). Its `getUrl` link downloads the full file (200, `model/stl`). No size limit was hit. But downloads came out named by UUID with no extension (see handoff notes), so scans moved to Vercel Blob.
+
+**Vercel Blob** (final): a 200 MB file uploaded with a client token and `multipart` in ~4 min. Its URL serves `content-disposition: attachment; filename="lower.stl"`, `content-type: model/stl` and the full length. Blob itself rejected a wrong content type (`BlobContentTypeNotAllowedError`) and a file over the token's size limit (`BlobFileTooLargeError`).
 
 ### Acceptance criteria
 

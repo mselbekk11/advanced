@@ -1,6 +1,7 @@
 'use client';
 
-import { useMutation } from 'convex/react';
+import { put } from '@vercel/blob/client';
+import { useAction } from 'convex/react';
 import { CheckCircle2, FileBox, RotateCw, Upload, X, XCircle } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type DragEvent } from 'react';
 import { toast } from 'sonner';
@@ -9,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 import { formatBytes, MAX_SCAN_BYTES, MAX_SCANS, SCAN_ACCEPT, scanContentType, scanFileProblem } from '@/convex/lib/scans';
 
 type ScanItem = {
@@ -17,11 +17,11 @@ type ScanItem = {
   file: File;
   status: 'uploading' | 'done' | 'error';
   progress: number;
-  storageId?: Id<'_storage'>;
+  pathname?: string;
   error?: string;
 };
 
-export type UploadedScan = { storageId: Id<'_storage'>; fileName: string };
+export type UploadedScan = { pathname: string; fileName: string };
 
 export type ScanUploadState = { uploading: number; failed: number };
 
@@ -40,18 +40,18 @@ type Props = {
 };
 
 // Drag-and-drop / picker for intraoral scans. Each file uploads straight to
-// Convex storage as soon as it's added, with its own progress bar; failed
-// uploads can be retried and any file can be removed before submit. Removed
-// and abandoned uploads are deleted later by the storage sweep.
+// Vercel Blob as soon as it's added (with a token from Convex), with its own
+// progress bar; failed uploads can be retried and any file can be removed
+// before submit. Removed and abandoned uploads are deleted later by the sweep.
 export const ScanUpload = forwardRef<ScanUploadHandle, Props>(function ScanUpload(
   { disabled, onStateChange },
   ref
 ) {
-  const generateUploadUrl = useMutation(api.rxSubmissions.generateUploadUrl);
+  const createScanUpload = useAction(api.scanUploadsNode.createScanUpload);
   const [items, setItems] = useState<ScanItem[]>([]);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const requests = useRef(new Map<string, XMLHttpRequest>());
+  const requests = useRef(new Map<string, AbortController>());
 
   const update = (key: string, patch: Partial<ScanItem>) =>
     setItems((prev) => prev.map((it) => (it.key === key ? { ...it, ...patch } : it)));
@@ -63,16 +63,16 @@ export const ScanUpload = forwardRef<ScanUploadHandle, Props>(function ScanUploa
   // Abort anything still uploading if the form goes away.
   useEffect(() => {
     const inFlight = requests.current;
-    return () => inFlight.forEach((xhr) => xhr.abort());
+    return () => inFlight.forEach((controller) => controller.abort());
   }, []);
 
   useImperativeHandle(ref, () => ({
     scans: () =>
       items
-        .filter((it) => it.status === 'done' && it.storageId)
-        .map((it) => ({ storageId: it.storageId!, fileName: it.file.name })),
+        .filter((it) => it.status === 'done' && it.pathname)
+        .map((it) => ({ pathname: it.pathname!, fileName: it.file.name })),
     reset: () => {
-      requests.current.forEach((xhr) => xhr.abort());
+      requests.current.forEach((controller) => controller.abort());
       requests.current.clear();
       setItems([]);
     },
@@ -80,14 +80,22 @@ export const ScanUpload = forwardRef<ScanUploadHandle, Props>(function ScanUploa
 
   async function upload(key: string, file: File) {
     update(key, { status: 'uploading', progress: 0, error: undefined });
+    const controller = new AbortController();
+    requests.current.set(key, controller);
     try {
-      const url = await generateUploadUrl();
-      const storageId = await postWithProgress(url, file, (progress) => update(key, { progress }), (xhr) =>
-        requests.current.set(key, xhr)
-      );
-      update(key, { status: 'done', progress: 100, storageId });
+      const { pathname, token } = await createScanUpload({ fileName: file.name, size: file.size });
+      await put(pathname, file, {
+        access: 'public',
+        token,
+        contentType: scanContentType(file.name)!,
+        // Large scans go up in parallel parts, each retried on failure.
+        multipart: file.size > MULTIPART_THRESHOLD,
+        abortSignal: controller.signal,
+        onUploadProgress: ({ percentage }) => update(key, { progress: percentage }),
+      });
+      update(key, { status: 'done', progress: 100, pathname });
     } catch (err) {
-      if (err instanceof UploadAborted) return;
+      if (controller.signal.aborted) return;
       console.error(`Scan upload failed: ${file.name}`, err);
       update(key, { status: 'error', error: 'Upload failed' });
     } finally {
@@ -220,34 +228,5 @@ export const ScanUpload = forwardRef<ScanUploadHandle, Props>(function ScanUploa
   );
 });
 
-class UploadAborted extends Error {}
-
-// fetch() can't report upload progress, so scans go up with XMLHttpRequest.
-// The content type comes from the extension so the server can verify it.
-function postWithProgress(
-  url: string,
-  file: File,
-  onProgress: (percent: number) => void,
-  onStart: (xhr: XMLHttpRequest) => void
-) {
-  return new Promise<Id<'_storage'>>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
-    xhr.setRequestHeader('Content-Type', scanContentType(file.name)!);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress((e.loaded / e.total) * 100);
-    };
-    xhr.onload = () => {
-      if (xhr.status < 200 || xhr.status >= 300) return reject(new Error(`Upload failed (${xhr.status})`));
-      try {
-        resolve((JSON.parse(xhr.responseText) as { storageId: Id<'_storage'> }).storageId);
-      } catch (err) {
-        reject(err);
-      }
-    };
-    xhr.onerror = () => reject(new Error('Network error'));
-    xhr.onabort = () => reject(new UploadAborted());
-    onStart(xhr);
-    xhr.send(file);
-  });
-}
+// Vercel recommends multipart uploads above 100 MB.
+const MULTIPART_THRESHOLD = 100 * 1024 * 1024;

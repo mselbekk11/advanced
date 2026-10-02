@@ -11,9 +11,10 @@ const ORPHAN_AGE_MS = 24 * HOUR;
 // mutation.
 const SWEEP_WINDOW_MS = 3 * 24 * HOUR;
 
-// Deletes uploads that no submission references: drawings and scans from
-// abandoned forms, files removed before submit, and uploads the submit
-// mutation rejected (a throwing mutation can't delete them itself).
+// Deletes Convex storage uploads that no submission references: drawings
+// from abandoned forms and drawings the submit mutation rejected (a throwing
+// mutation can't delete them itself). Scans live in Vercel Blob and have
+// their own sweep (scanUploadsNode.ts).
 export const sweepOrphanedUploads = internalMutation({
   args: {},
   handler: async (ctx) => {
@@ -34,7 +35,7 @@ export const sweepOrphanedUploads = internalMutation({
     const referenced = new Set<string>();
     for (const s of submissions) {
       if (s.drawing) referenced.add(s.drawing);
-      for (const scan of s.scans ?? []) referenced.add(scan.storageId);
+      for (const scan of s.scans ?? []) if ('storageId' in scan) referenced.add(scan.storageId);
     }
 
     let deleted = 0;

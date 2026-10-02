@@ -31,7 +31,8 @@ const rule = '#d6d0ee';
 
 const font = 'Helvetica, Arial, sans-serif';
 
-export type EmailScan = { fileName: string; size: number; url: string };
+// A scan without a url never finished uploading.
+export type EmailScan = { fileName: string; size?: number; url?: string };
 
 type Props = {
   submission: RxSubmissionInput;
@@ -179,15 +180,20 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
               ) : (
                 scans.map((scan, i) => (
                   <Row
-                    key={scan.url}
+                    key={scan.fileName + i}
                     data-scan={scan.fileName}
                     style={i < scans.length - 1 ? { borderBottom: `1px solid ${rule}` } : undefined}
                   >
                     <Column style={{ padding: '6px 8px 6px 0', verticalAlign: 'middle' }}>
                       <Text style={{ ...value, margin: 0, wordBreak: 'break-all' }}>{scan.fileName}</Text>
-                      <Text style={{ ...small, margin: 0 }}>{formatBytes(scan.size)}</Text>
+                      <Text style={{ ...small, margin: 0 }}>
+                        {scan.url && scan.size !== undefined
+                          ? formatBytes(scan.size)
+                          : 'Upload missing. Please ask the doctor to resend this scan.'}
+                      </Text>
                     </Column>
                     <Column style={{ width: 90, padding: '6px 0', verticalAlign: 'middle', textAlign: 'right' }}>
+                      {scan.url && (
                       <Link
                         href={scan.url}
                         style={{
@@ -203,6 +209,7 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
                       >
                         Download
                       </Link>
+                      )}
                     </Column>
                   </Row>
                 ))
@@ -374,7 +381,15 @@ RxOwnerEmail.PreviewProps = {
     instructions: 'Please add a bite plane.',
   },
   scans: [
-    { fileName: 'alex-doe-upper.stl', size: 48_234_496, url: 'https://example.convex.cloud/api/storage/upper' },
-    { fileName: 'alex-doe-lower.ply', size: 212_860_928, url: 'https://example.convex.cloud/api/storage/lower' },
+    {
+      fileName: 'alex-doe-upper.stl',
+      size: 48_234_496,
+      url: 'https://example.public.blob.vercel-storage.com/scans/a1/alex-doe-upper.stl?download=1',
+    },
+    {
+      fileName: 'alex-doe-lower.ply',
+      size: 212_860_928,
+      url: 'https://example.public.blob.vercel-storage.com/scans/b2/alex-doe-lower.ply?download=1',
+    },
   ],
 } satisfies Props;

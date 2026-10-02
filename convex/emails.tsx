@@ -11,6 +11,7 @@ import { DRAWING_CID } from './lib/drawing';
 import { ownerAddress, routeEmail } from './lib/emailRouting';
 import { ownerRxSubject } from './lib/rxSubmission';
 import { resend } from './resend';
+import { scanDetails } from './scanUploadsNode';
 
 // Retry schedule for sends that bypass the component's queue (inline drawing).
 const MANUAL_RETRY_DELAYS_MS = [30_000, 2 * 60_000, 10 * 60_000, 30 * 60_000];
@@ -34,7 +35,7 @@ export const sendOwnerRxEmail = internalAction({
         subject: ownerRxSubject(submission),
       });
       const drawing = submission.drawing ? await loadDrawing(ctx, submission.drawing) : null;
-      const scans = await scanLinks(ctx, submission.scans ?? []);
+      const scans = await scanLinks(ctx, submission);
       const html = await render(
         <RxOwnerEmail
           submission={submission}
@@ -110,13 +111,21 @@ async function loadDrawing(ctx: ActionCtx, id: Id<'_storage'>) {
   return Buffer.from(await blob.arrayBuffer());
 }
 
-// Permanent, unguessable storage URLs the owner downloads the scans from.
-async function scanLinks(ctx: ActionCtx, scans: Doc<'rxSubmissions'>['scans'] & {}) {
+// Looks each scan up in Vercel Blob for its download link and real size, and
+// saves those on the submission. A scan that never finished uploading is
+// listed without a link so the owner knows to ask for it.
+async function scanLinks(ctx: ActionCtx, submission: Doc<'rxSubmissions'>) {
   const links: EmailScan[] = [];
-  for (const scan of scans) {
-    const url = await ctx.storage.getUrl(scan.storageId);
-    if (!url) throw new Error(`Scan ${scan.storageId} (${scan.fileName}) is missing from storage`);
-    links.push({ fileName: scan.fileName, size: scan.size, url });
+  const details = [];
+  for (const scan of submission.scans ?? []) {
+    if (!('pathname' in scan)) continue; // early dev rows in Convex storage
+    const found = await scanDetails(scan.pathname);
+    if (!found) console.error(`Scan ${scan.pathname} is missing from Blob`);
+    details.push({ pathname: scan.pathname, ...found });
+    links.push({ fileName: scan.fileName, size: found?.size, url: found?.url });
+  }
+  if (details.length) {
+    await ctx.runMutation(internal.rxSubmissions.setScanDetails, { id: submission._id, details });
   }
   return links;
 }

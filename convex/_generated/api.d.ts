@@ -18,6 +18,8 @@ import type * as lib_rxSubmission from "../lib/rxSubmission.js";
 import type * as lib_scans from "../lib/scans.js";
 import type * as resend from "../resend.js";
 import type * as rxSubmissions from "../rxSubmissions.js";
+import type * as scanUploads from "../scanUploads.js";
+import type * as scanUploadsNode from "../scanUploadsNode.js";
 import type * as storage from "../storage.js";
 
 import type {
@@ -37,6 +39,8 @@ declare const fullApi: ApiFromModules<{
   "lib/scans": typeof lib_scans;
   resend: typeof resend;
   rxSubmissions: typeof rxSubmissions;
+  scanUploads: typeof scanUploads;
+  scanUploadsNode: typeof scanUploadsNode;
   storage: typeof storage;
 }>;
 

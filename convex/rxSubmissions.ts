@@ -3,7 +3,7 @@ import { internal } from './_generated/api';
 import { internalMutation, internalQuery, mutation } from './_generated/server';
 import { drawingProblem } from './lib/drawing';
 import { rxSubmissionSchema } from './lib/rxSubmission';
-import { MAX_SCANS, scanUploadProblem } from './lib/scans';
+import { MAX_SCANS } from './lib/scans';
 import { vEmailStatus } from './schema';
 
 const optional = v.optional(v.string());
@@ -26,7 +26,7 @@ export const submit = mutation({
     color: optional,
     instructions: optional,
     drawing: v.optional(v.id('_storage')),
-    scans: v.optional(v.array(v.object({ storageId: v.id('_storage'), fileName: v.string() }))),
+    scans: v.optional(v.array(v.object({ pathname: v.string(), fileName: v.string() }))),
   },
   handler: async (ctx, { drawing, scans: scanUploads = [], ...args }) => {
     const parsed = rxSubmissionSchema.safeParse(args);
@@ -46,24 +46,29 @@ export const submit = mutation({
     if (scanUploads.length > MAX_SCANS) {
       throw new ConvexError({ message: `Attach at most ${MAX_SCANS} scans`, issues: [] });
     }
-    if (new Set(scanUploads.map((s) => s.storageId)).size !== scanUploads.length) {
+    if (new Set(scanUploads.map((s) => s.pathname)).size !== scanUploads.length) {
       throw new ConvexError({ message: 'The same scan was attached twice', issues: [] });
     }
-    // Size and type come from the stored file, not from the browser. Rejected
-    // files are left for the orphaned-storage sweep, as with the drawing.
-    const scans = [];
-    for (const { storageId, fileName } of scanUploads) {
-      const meta = await ctx.db.system.get('_storage', storageId);
-      const problem = scanUploadProblem(fileName, meta);
-      if (problem || !meta) throw new ConvexError({ message: problem, issues: [] });
-      scans.push({ storageId, fileName, size: meta.size, contentType: meta.contentType! });
+    // Only accept uploads we issued a token for (see scanUploadsNode.ts) that
+    // no other submission has claimed. Blob enforced type and size at upload.
+    const uploads = [];
+    for (const { pathname, fileName } of scanUploads) {
+      const upload = await ctx.db
+        .query('scanUploads')
+        .withIndex('by_pathname', (q) => q.eq('pathname', pathname))
+        .unique();
+      if (!upload || upload.submissionId || upload.fileName !== fileName) {
+        throw new ConvexError({ message: `${fileName}: upload not found`, issues: [] });
+      }
+      uploads.push(upload);
     }
     const id = await ctx.db.insert('rxSubmissions', {
       ...parsed.data,
       drawing,
-      scans,
+      scans: uploads.map(({ pathname, fileName }) => ({ pathname, fileName })),
       ownerEmailStatus: 'pending',
     });
+    for (const upload of uploads) await ctx.db.patch(upload._id, { submissionId: id });
     await ctx.scheduler.runAfter(0, internal.emails.sendOwnerRxEmail, { submissionId: id });
     return id;
   },
@@ -78,6 +83,31 @@ export const generateUploadUrl = mutation({
 export const get = internalQuery({
   args: { id: v.id('rxSubmissions') },
   handler: (ctx, { id }) => ctx.db.get(id),
+});
+
+// Records each scan's link, size and type from Blob, once it's been checked.
+export const setScanDetails = internalMutation({
+  args: {
+    id: v.id('rxSubmissions'),
+    details: v.array(
+      v.object({
+        pathname: v.string(),
+        url: v.optional(v.string()),
+        size: v.optional(v.number()),
+        contentType: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, { id, details }) => {
+    const submission = await ctx.db.get(id);
+    if (!submission?.scans) return;
+    const byPath = new Map(details.map((d) => [d.pathname, d]));
+    await ctx.db.patch(id, {
+      scans: submission.scans.map((scan) =>
+        'pathname' in scan ? { ...scan, ...byPath.get(scan.pathname) } : scan
+      ),
+    });
+  },
 });
 
 export const setOwnerEmailStatus = internalMutation({

@@ -1,5 +1,6 @@
-// Rules for intraoral scan uploads, shared by the form, the submit mutation
-// and the owner email.
+// Rules for intraoral scan uploads, shared by the form, the upload-token
+// action and the owner email. Scans are stored in Vercel Blob, which (unlike
+// Convex storage) serves them under their file name.
 
 export const MAX_SCAN_BYTES = 250 * 1024 * 1024;
 
@@ -7,8 +8,8 @@ export const MAX_SCAN_BYTES = 250 * 1024 * 1024;
 export const MAX_SCANS = 20;
 
 // The browser uploads each scan with the content type for its extension
-// (browsers report "" or various types for .stl/.ply), so the server can check
-// the stored type against the file name.
+// (browsers report "" or various types for .stl/.ply); the upload token only
+// allows that type.
 export const SCAN_CONTENT_TYPES = {
   stl: 'model/stl',
   ply: 'model/x-ply',
@@ -33,18 +34,20 @@ export function scanFileProblem(file: { name: string; size: number }) {
   return null;
 }
 
-// Returns why an uploaded file can't be saved as a scan, or null if it's fine.
-// `meta` is the file's Convex storage metadata.
-export function scanUploadProblem(
-  fileName: string,
-  meta: { contentType?: string; size: number } | null
-) {
-  if (!meta) return `${fileName}: upload not found`;
-  const fileProblem = scanFileProblem({ name: fileName, size: meta.size });
-  if (fileProblem) return `${fileName}: ${fileProblem}`;
-  if (meta.contentType !== scanContentType(fileName)) return `${fileName}: unexpected file type`;
-  return null;
+// Characters that can't go in a blob pathname segment or a download file name.
+const UNSAFE_NAME_CHARS = /[\/\\?#%"<>|:*\u0000-\u001f\u007f]/g;
+
+// Where a scan is stored in Vercel Blob. The random folder keeps the link
+// unguessable while the last segment stays the doctor's file name, which is
+// what the owner's browser saves it as.
+export function scanPathname(folder: string, fileName: string) {
+  const safe = fileName.replace(UNSAFE_NAME_CHARS, '_').trim() || 'scan';
+  return `scans/${folder}/${safe}`;
 }
+
+// How long a browser has to finish one upload. Blob's default is 30 seconds,
+// far too short for a 250 MB scan on a slow connection.
+export const SCAN_UPLOAD_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 // 209715200 -> "200 MB". Binary units, labelled the way people expect.
 export function formatBytes(bytes: number) {

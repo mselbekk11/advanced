@@ -90,7 +90,7 @@ describe('formatDate', () => {
     const text = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />, { plainText: true });
     for (const scan of RxOwnerEmail.PreviewProps.scans) {
       expect(html).toContain(`data-scan="${scan.fileName}"`);
-      expect(html).toContain(`href="${scan.url}"`);
+      expect(html).toContain(`href="${scan.url.replace(/&/g, '&amp;')}"`);
     }
     expect(text).toContain('46 MB');
     expect(text).toContain('203 MB');
@@ -101,5 +101,14 @@ describe('formatDate', () => {
     expect(html).toContain('data-section="scans"');
     expect(html).toContain('None attached');
     expect(html).not.toContain('data-scan=');
+  });
+
+  it('flags a scan that never finished uploading, without a link', async () => {
+    const html = await render(
+      <RxOwnerEmail submission={sample} scans={[{ fileName: 'lost.stl' }]} />
+    );
+    expect(html).toContain('data-scan="lost.stl"');
+    expect(html).toContain('Upload missing');
+    expect(html).not.toContain('Download');
   });
 });

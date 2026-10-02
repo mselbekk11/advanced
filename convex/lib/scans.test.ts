@@ -4,7 +4,7 @@ import {
   MAX_SCAN_BYTES,
   scanContentType,
   scanFileProblem,
-  scanUploadProblem,
+  scanPathname,
 } from './scans';
 
 describe('scanContentType', () => {
@@ -37,28 +37,18 @@ describe('scanFileProblem', () => {
   });
 });
 
-describe('scanUploadProblem', () => {
-  it('accepts a stored file whose type matches its name', () => {
-    expect(scanUploadProblem('upper.stl', { contentType: 'model/stl', size: 1000 })).toBeNull();
+describe('scanPathname', () => {
+  it('keeps the file name as the last segment', () => {
+    expect(scanPathname('abc', 'Alex Doe upper.stl')).toBe('scans/abc/Alex Doe upper.stl');
   });
 
-  it('rejects a missing upload', () => {
-    expect(scanUploadProblem('upper.stl', null)).toMatch(/not found/);
+  it('replaces characters that would break the path or the download name', () => {
+    expect(scanPathname('abc', '../x/y?.stl')).toBe('scans/abc/.._x_y_.stl');
+    expect(scanPathname('abc', 'a"b#c%.ply')).toBe('scans/abc/a_b_c_.ply');
   });
 
-  it('rejects a stored type that does not match the name', () => {
-    expect(scanUploadProblem('upper.stl', { contentType: 'image/png', size: 1000 })).toMatch(/type/);
-    expect(scanUploadProblem('upper.stl', { size: 1000 })).toMatch(/type/);
-  });
-
-  it('rejects by the stored size, not the claimed one', () => {
-    expect(scanUploadProblem('upper.stl', { contentType: 'model/stl', size: MAX_SCAN_BYTES + 1 })).toMatch(
-      /250 MB/
-    );
-  });
-
-  it('rejects a disallowed name', () => {
-    expect(scanUploadProblem('upper.exe', { contentType: 'model/stl', size: 10 })).toMatch(/\.stl/);
+  it('never produces an empty name', () => {
+    expect(scanPathname('abc', '   ')).toBe('scans/abc/scan');
   });
 });
 
