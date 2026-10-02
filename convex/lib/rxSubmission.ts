@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import { appliances, clasps, colors, positions, springs } from './rxOptions';
+
+// Optional select: empty string (nothing chosen) or one of the listed options.
+const optionalChoice = (options: readonly [string, ...string[]]) =>
+  z.union([z.literal(''), z.enum(options)], 'Choose an option from the list').optional();
 
 // Shared validation for an RX form submission. Used by the Convex `submit`
 // mutation and (from phase 2) by the client form.
@@ -11,12 +16,12 @@ export const rxSubmissionSchema = z.object({
   city: z.string().trim().optional(),
   zip: z.string().trim().optional(),
   patient: z.string().trim().min(1, 'Patient is required'),
-  deliveryDate: z.string().trim().optional(),
-  appliance: z.string().trim().min(1, 'Appliance is required'),
-  position: z.string().trim().optional(),
-  clasp: z.string().trim().optional(),
-  spring: z.string().trim().optional(),
-  color: z.string().trim().optional(),
+  deliveryDate: z.union([z.literal(''), z.iso.date('Enter a valid date')]).optional(),
+  appliance: z.enum(appliances as [string, ...string[]], 'Choose an appliance'),
+  position: optionalChoice(positions),
+  clasp: optionalChoice(clasps),
+  spring: optionalChoice(springs),
+  color: optionalChoice(colors),
   instructions: z.string().trim().optional(),
 });
 

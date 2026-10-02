@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 import { ConvexClientProvider } from './ConvexClientProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           {children}
           <Analytics />
           <FooterTwo />
+          <Toaster richColors position='top-right' />
         </ConvexClientProvider>
       </body>
       {/* <Script

@@ -11,6 +11,7 @@
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
 import type * as lib_emailRouting from "../lib/emailRouting.js";
+import type * as lib_rxOptions from "../lib/rxOptions.js";
 import type * as lib_rxSubmission from "../lib/rxSubmission.js";
 import type * as resend from "../resend.js";
 import type * as rxSubmissions from "../rxSubmissions.js";
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   emails: typeof emails;
   http: typeof http;
   "lib/emailRouting": typeof lib_emailRouting;
+  "lib/rxOptions": typeof lib_rxOptions;
   "lib/rxSubmission": typeof lib_rxSubmission;
   resend: typeof resend;
   rxSubmissions: typeof rxSubmissions;

@@ -1,93 +1,135 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-
-import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { Download, Palette } from 'lucide-react';
+import { ConvexError } from 'convex/values';
+import { Download, Loader2, Palette } from 'lucide-react';
+import Image from 'next/image';
+import { useForm, type FieldPath } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
-import { FormEvent, useState } from 'react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/convex/_generated/api';
+import { applianceGroups, clasps, colors, positions, springs } from '@/convex/lib/rxOptions';
+import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
+
+type RxFormValues = z.input<typeof rxSubmissionSchema>;
+
+const emptyValues: RxFormValues = {
+  first: '',
+  last: '',
+  email: '',
+  phone: '',
+  street: '',
+  city: '',
+  zip: '',
+  patient: '',
+  deliveryDate: '',
+  appliance: '',
+  position: '',
+  clasp: '',
+  spring: '',
+  color: '',
+  instructions: '',
+};
+
+type TextFieldConfig = {
+  name: FieldPath<RxFormValues>;
+  label: string;
+  required?: boolean;
+  type?: string;
+  autoComplete?: string;
+  placeholder?: string;
+};
+
+const textFields: TextFieldConfig[] = [
+  { name: 'first', label: 'First name', required: true, autoComplete: 'given-name' },
+  { name: 'last', label: 'Last name', required: true, autoComplete: 'family-name' },
+  { name: 'email', label: 'Email', required: true, type: 'email', autoComplete: 'email' },
+  { name: 'phone', label: 'Phone', required: true, type: 'tel', autoComplete: 'tel' },
+  { name: 'street', label: 'Street address', autoComplete: 'street-address' },
+  { name: 'city', label: 'City', autoComplete: 'address-level2' },
+  { name: 'zip', label: 'ZIP / postal code', autoComplete: 'postal-code' },
+  { name: 'patient', label: 'Patient', required: true, autoComplete: 'off' },
+];
+
+type SelectFieldConfig = {
+  name: FieldPath<RxFormValues>;
+  label: string;
+  placeholder: string;
+  options: readonly string[];
+};
+
+const selectFields: SelectFieldConfig[] = [
+  { name: 'position', label: 'Position', placeholder: 'Upper / Lower / Both', options: positions },
+  { name: 'clasp', label: 'Clasp', placeholder: 'Choose a clasp', options: clasps },
+  { name: 'spring', label: 'Spring', placeholder: 'Spring or specify type', options: springs },
+];
+
+function RequiredMark() {
+  return (
+    <span aria-hidden className='text-destructive'>
+      {' '}
+      *
+    </span>
+  );
+}
 
 export default function Rxform() {
-  let currentDate = new Date().toJSON().slice(0, 10);
-
-  const [first, setFirst] = useState('');
-  const [last, setLast] = useState('');
-  const [email, setEmail] = useState('');
-
-  const [street, setStreet] = useState('');
-  const [zip, setZip] = useState('');
-  const [city, setCity] = useState('');
-
-  const [phone, setPhone] = useState('');
-  const [patient, setPatient] = useState('');
-  const [date, setDate] = useState('');
-
-  const [appliance, setAppliance] = useState('');
-  const [position, setPosition] = useState('');
-  const [clasp, setClasp] = useState('');
-  const [spring, setSpring] = useState('');
-  const [color, setColor] = useState('');
-
-  const [message, setMessage] = useState('');
-
   const submitRx = useMutation(api.rxSubmissions.submit);
-  const [submitting, setSubmitting] = useState(false);
+  const form = useForm<RxFormValues>({
+    resolver: zodResolver(rxSubmissionSchema),
+    defaultValues: emptyValues,
+  });
+  const submitting = form.formState.isSubmitting;
+  const today = new Date().toISOString().slice(0, 10);
 
-  const resetForm = () => {
-    setFirst('');
-    setLast('');
-    setEmail('');
-    setStreet('');
-    setZip('');
-    setCity('');
-    setPhone('');
-    setPatient('');
-    setDate('');
-    setAppliance('');
-    setPosition('');
-    setClasp('');
-    setSpring('');
-    setColor('');
-    setMessage('');
-  };
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
+  const onSubmit = async (values: RxFormValues) => {
     try {
-      await submitRx({
-        first,
-        last,
-        email,
-        phone,
-        street,
-        city,
-        zip,
-        patient,
-        deliveryDate: date,
-        appliance,
-        position,
-        clasp,
-        spring,
-        color,
-        instructions: message,
-      });
-      resetForm();
+      await submitRx(rxSubmissionSchema.parse(values));
+      form.reset(emptyValues);
       toast.success('Form sent! We will be in touch shortly!');
     } catch (err) {
       console.error('RX submission failed', err);
+      // Surface server-side validation errors on the matching fields.
+      const issues =
+        err instanceof ConvexError
+          ? (err.data as { issues?: { path: string; message: string }[] }).issues
+          : undefined;
+      issues?.forEach((issue) =>
+        form.setError(issue.path as FieldPath<RxFormValues>, { message: issue.message })
+      );
       toast.error(
         'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.'
       );
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -107,445 +149,223 @@ export default function Rxform() {
           </p>
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
+          <div className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
             <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
-              <Image
-                src='/mouth.png'
-                alt='teeth diagram'
-                width='400'
-                height='500'
-              />
+              <Image src='/mouth.png' alt='teeth diagram' width='400' height='500' />
               <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
-                <a
-                  href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7J6b3uyMEHgFZOARtxbkeGYJsXWdj1zLyU42'
-                  target='_blank'
-                >
-                  <Button variant='outline' className='w-full'>
+                <Button variant='outline' className='w-full' asChild>
+                  <a
+                    href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7J6b3uyMEHgFZOARtxbkeGYJsXWdj1zLyU42'
+                    target='_blank'
+                  >
                     <Download className='mr-2 h-4 w-4' />
                     Download Form
-                  </Button>
-                </a>
-                <a
-                  href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7XsraryMEHgFZOARtxbkeGYJsXWdj1zLyU42'
-                  target='_blank'
-                >
-                  <Button variant='outline' className='w-full'>
-                    <Palette className='mr-2 h-4 w-4' />
-                    View Color Chart
-                  </Button>
-                </a>
+                  </a>
+                </Button>
+                <ColorChartDialog />
               </div>
             </div>
-            <form method='POST' onSubmit={onSubmit}>
-              <div className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg'>
-                <div className='bg-white grid grid-cols-1 gap-x-8 gap-y-8 lg:max-w-none lg:grid-cols-2'>
-                  <input
-                    value={first}
-                    onChange={(e) => setFirst(e.target.value)}
-                    type='text'
-                    placeholder='First Name'
-                    name='firstname'
-                    id='firstname'
-                    autoComplete='given-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={last}
-                    onChange={(e) => setLast(e.target.value)}
-                    type='text'
-                    placeholder='Last Name'
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
-                    name='lastname'
-                    id='lastname'
-                    autoComplete='family-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type='email'
-                    name='email'
-                    id='email'
-                    autoComplete='email'
-                    placeholder='Email'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    type='text'
-                    placeholder='Street address'
-                    name='streetaddress'
-                    id='street-address'
-                    autoComplete='street-address'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
-                    type='text'
-                    placeholder='ZIP or postal code (optional)'
-                    name='postalcode'
-                    id='postal-code'
-                    autoComplete='postal-code'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    type='text'
-                    placeholder='City'
-                    name='city'
-                    id='city'
-                    autoComplete='address-level2'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    type='tel'
-                    autoComplete='tel'
-                    placeholder='Phone'
-                    required
-                    name='phone'
-                    id='phone'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={patient}
-                    onChange={(e) => setPatient(e.target.value)}
-                    type='text'
-                    placeholder='Patient'
-                    required
-                    name='patient'
-                    id='patient'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  {/* <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <label htmlFor='date'>Pick up date</label>
-                    <input
-                      value={currentDate}
-                      onChange={(e) => setDate(e.target.value)}
-                      type='date'
-                      placeholder={currentDate}
-                      name='date'
-                      id='date'
-                      className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+
+            <Form {...form}>
+              <form
+                noValidate
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg space-y-6'
+              >
+                <p className='text-sm text-muted-foreground'>
+                  Fields marked <span className='text-destructive'>*</span> are required.
+                </p>
+
+                <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+                  {textFields.map((f) => (
+                    <FormField
+                      key={f.name}
+                      control={form.control}
+                      name={f.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {f.label}
+                            {f.required && <RequiredMark />}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type={f.type ?? 'text'}
+                              autoComplete={f.autoComplete}
+                              {...field}
+                              value={field.value ?? ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div> */}
+                  ))}
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={appliance}
-                      onChange={(e) => setAppliance(e.target.value)}
-                      id='appliance'
-                      name='appliance'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Choose an Appliance
-                      </option>
-                      <option value='Hawley Retainer U/L'>
-                        Hawley Retainer U/L
-                      </option>
-                      <option value='Hawley Retainer U/L 2X2 wire'>
-                        Hawley Retainer U/L 2X2 wire
-                      </option>
-                      <option value='Dugonni Retainer'>Dugonni Retainer</option>
-                      <option value='wraparound Retainer'>
-                        Wraparound Retainer
-                      </option>
-                      <option value='Modified Spring Retainer'>
-                        Modified Spring Retainer
-                      </option>
-                      <option value='Schwarz'>Schwarz</option>
-                      <option value='Nance Holding Arch'>
-                        Nance Holding Arch
-                      </option>
-                      <option value='Quad Helix Expansion W Arch'>
-                        Quad Helix Expansion W Arch
-                      </option>
-                      <option value='Hydrax Rapid Palatal Expander'>
-                        Hydrax Rapid Palatal Expander
-                      </option>
-                      <option value='Haas Palatal Seperator'>
-                        Haas Palatal Seperator
-                      </option>
-                      <option value='Bonded R.P.E'>Bonded R.P.E</option>
-                      <option value='Habit Crib'>Habit Crib</option>
-                      <option value='6x6 Lingualarch'>6x6 Lingualarch</option>
-                      <option value='Space Maintainer'>Space Maintainer</option>
-                      <option value='Horseshoe Splint (BRUXISM)'>
-                        Horseshoe Splint (BRUXISM)
-                      </option>
-                      <option value='Gelb/Mora'>Gelb/Mora</option>
-                      <option value='Invisible Retainer/Essex'>
-                        Invisible Retainer/Essex
-                      </option>
-                      <option value='Other - Specify Below'>
-                        Other - Specify Below
-                      </option>
-                    </select>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='deliveryDate'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery date</FormLabel>
+                        <FormControl>
+                          <Input type='date' min={today} {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
-                      id='position'
-                      name='position'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Upper / Lower / Both
-                      </option>
-                      <option value='Upper'>Upper</option>
-                      <option value='Lower'>Lower</option>
-                      <option value='Both'>Both</option>
-                    </select>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='appliance'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Appliance
+                          <RequiredMark />
+                        </FormLabel>
+                        <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger onBlur={field.onBlur}>
+                              <SelectValue placeholder='Choose an appliance' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {applianceGroups.map((group) => (
+                              <SelectGroup key={group.label}>
+                                <SelectLabel>{group.label}</SelectLabel>
+                                {group.items.map((item) => (
+                                  <SelectItem key={item} value={item}>
+                                    {item}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={clasp}
-                      onChange={(e) => setClasp(e.target.value)}
-                      id='clasp'
-                      name='clasp'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Choose a Clasp
-                      </option>
-                      <option value='Adams Clasp'>Adams Clasp</option>
-                      <option value='Ball Clasp'>Ball Clasp</option>
-                      <option value='C Clasp'>C Clasp</option>
-                      <option value='Other - Specify Below'>
-                        Other - Specify Below
-                      </option>
-                    </select>
-                  </div>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={spring}
-                      onChange={(e) => setSpring(e.target.value)}
-                      id='spring'
-                      name='spring'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Spring or Specify Type
-                      </option>
-                      <option value='Spring'>Spring</option>
-                      <option value='Specify Type Below'>
-                        Specify Type Below
-                      </option>
-                    </select>
-                  </div>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      id='color'
-                      name='color'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Appliance Color
-                      </option>
-                      <option value='Any'>Any</option>
-                      <option value='Wine'>Wine</option>
-                      <option value='Black Cherry'>Black Cherry</option>
-                      <option value='Fluoresent Pink'>Fluoresent Pink</option>
-                      <option value='Raspberry'>Raspberry</option>
-                      <option value='Cranberry'>Cranberry</option>
-                      <option value='Cherry'>Cherry</option>
-                      <option value='Route Beer Brown'>Route Beer Brown</option>
-                      <option value='Persimon'>Persimon</option>
-                      <option value='Tangerine'>Tangerine</option>
-                      <option value='Gold'>Gold</option>
-                      <option value='Amber'>Amber</option>
-
-                      <option value='Any'>Lemon Yellow</option>
-                      <option value='Fluorescent Yellow'>
-                        Fluorescent Yellow
-                      </option>
-                      <option value='Apple Green'>Apple Green</option>
-                      <option value='Grass Green'>Grass Green</option>
-                      <option value='Emerald Green'>Emerald Green</option>
-                      <option value='Teal Green'>Teal Green</option>
-                      <option value='Aqua Blue'>Aqua Blue</option>
-                      <option value='Turqouise'>Turqouise</option>
-                      <option value='Caribbean Blue'>Caribbean Blue</option>
-                      <option value='Ice Blue'>Ice Blue</option>
-                      <option value='Special Med Blue'>Special Med Blue</option>
-
-                      <option value='Saphire Blue'>Saphire Blue</option>
-                      <option value='Colbat Blue'>Colbat Blue</option>
-                      <option value='Light Prutple'>Light Prutple</option>
-                      <option value='Purple'>Purple</option>
-                      <option value='Light Violet'>Light Violet</option>
-                      <option value='Violet'>Violet</option>
-                      <option value='Black Onyx Liquid'>
-                        Black Onyx Liquid
-                      </option>
-                      <option value='Crystal Clear'>Crystal Clear</option>
-                      <option value='Standard Pink'>Standard Pink</option>
-                      <option value='Tinted Clear'>Tinted Clear</option>
-
-                      <option value='Luminary Red'>Luminary Red</option>
-                      <option value='Luminary Pink'>Luminary Pink</option>
-                      <option value='Luminary Coral Red'>
-                        Luminary Coral Red
-                      </option>
-                      <option value='Luminary Orange'>Luminary Orange</option>
-                      <option value='Luminary Blaze Yellow'>
-                        Luminary Blaze Yellow
-                      </option>
-                      <option value='Luminary Yellow'>Luminary Yellow</option>
-                      <option value='Luminary Green'>Luminary Green</option>
-                      <option value='Luminary Teal Green'>
-                        Luminary Teal Green
-                      </option>
-                      <option value='Luminary Blue'>Luminary Blue</option>
-                      <option value='Luminary Blueberry'>
-                        Luminary Blueberry
-                      </option>
-                      <option value='Luminary Purple'>Luminary Purple</option>
-                      <option value='Luminary Chartreuse'>
-                        Luminary Chartreuse
-                      </option>
-
-                      <option value='Royal Red'>Royal Red</option>
-                      <option value='Royal Pink'>Royal Pink</option>
-                      <option value='Royal Coral Red'>Royal Coral Red</option>
-                      <option value='Royal Orange'>Royal Orange</option>
-                      <option value='Royal Blaze Yellow'>
-                        Royal Blaze Yellow
-                      </option>
-                      <option value='Royal Yellow'>Royal Yellow</option>
-                      <option value='Royal Green'>Royal Green</option>
-                      <option value='Royal Teal Green'>Royal Teal Green</option>
-                      <option value='Royal Blue'>Royal Blue</option>
-                      <option value='Royal Blueberry'>Royal Blueberry</option>
-                      <option value='Royal Purple'>Royal Purple</option>
-
-                      <option value='Crimson Red'>Crimson Red</option>
-                      <option value='Candy Apple Red'>Candy Apple Red</option>
-                      <option value='Cameo Pink'>Cameo Pink</option>
-                      <option value='Sunriuse Orange'>Sunriuse Orange</option>
-                      <option value='Mustard Yellow'>Mustard Yellow</option>
-                      <option value='Banana Yellow'>Banana Yellow</option>
-                      <option value='Shamrock Green'>Shamrock Green</option>
-                      <option value='Fern Green'>Fern Green</option>
-                      <option value='Watermelon Green'>Watermelon Green</option>
-                      <option value='Sky Blue'>Sky Blue</option>
-
-                      <option value='Baby Blue'>Baby Blue</option>
-                      <option value='Lapis Blue'>Lapis Blue</option>
-                      <option value='Nautical Blue'>Nautical Blue</option>
-                      <option value='Amethyst'>Amethyst</option>
-                      <option value='Dove Gray'>Dove Gray</option>
-                      <option value='Dolphin Gray'>Dolphin Gray</option>
-                      <option value='Black Opaque'>Black Opaque</option>
-                      <option value='White Opaque'>White Opaque</option>
-                      <option value='Caramel Tan'>Caramel Tan</option>
-                      <option value='Chocolate Brown'>Chocolate Brown</option>
-
-                      <option value='Pink Pearl'>Pink Pearl</option>
-                      <option value='Peach Pearl'>Peach Pearl</option>
-                      <option value='Yellow Pearl'>Yellow Pearl</option>
-                      <option value='Green Pearl'>Green Pearl</option>
-                      <option value='Aqua Pearl'>Aqua Pearl</option>
-                      <option value='Blue Pearl'>Blue Pearl</option>
-                      <option value='Lavander Pearl'>Lavander Pearl</option>
-                      <option value='Lilac Pearl'>Lilac Pearl</option>
-                      <option value='Pearl White'>Pearl White</option>
-                      <option value='Midnight Black'>Midnight Black</option>
-
-                      <option value='Opalescent Sparkle'>
-                        Opalescent Sparkle
-                      </option>
-                      <option value='Silver Sparkle'>Silver Sparkle</option>
-                      <option value='Red Sparkle'>Red Sparkle</option>
-                      <option value='Golden Orange'>Golden Orange</option>
-                      <option value='Copper Sparkle'>Copper Sparkle</option>
-                      <option value='Salmon Pink'>Salmon Pink</option>
-                      <option value='Aztec Gold'>Aztec Gold</option>
-                      <option value='Kiwi Sparkle'>Kiwi Sparkle</option>
-                      <option value='Green Sparkle'>Green Sparkle</option>
-                      <option value='Hunter Green'>Hunter Green</option>
-                      <option value='Aqua Sparkle'>Aqua Sparkle</option>
-                      <option value='Crystal Blue'>Crystal Blue</option>
-                      <option value='Turquoise Sparkle'>
-                        Turquoise Sparkle
-                      </option>
-
-                      <option value='Blue Sparkle'>Blue Sparkle</option>
-                      <option value='Purple Sparkle'>Purple Sparkle</option>
-                      <option value='Lavender'>Lavender</option>
-                      <option value='Fuchsia'>Fuchsia</option>
-                      <option value='Black Sparkle'>Black Sparkle</option>
-                      <option value='Red Hatter'>Red Hatter</option>
-                      <option value='Tutti Frutti'>Tutti Frutti</option>
-                      <option value='Carnival Blue'>Carnival Blue</option>
-                      <option value='Miss Priss'>Miss Priss</option>
-                      <option value='Peacock'>Peacock</option>
-                      <option value='Pastel Rainbow'>Pastel Rainbow</option>
-                      <option value='Disco Rainbow'>Disco Rainbow</option>
-                      <option value='USA Sparkle'>USA Sparkle</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-2'>
-                  <label htmlFor='date' className='text-xs p-2'>
-                    Pick up date
-                  </label>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <input
-                      value={currentDate}
-                      onChange={(e) => setDate(e.target.value)}
-                      type='date'
-                      placeholder={currentDate}
-                      name='date'
-                      id='date'
-                      className='block w-full'
+                  {selectFields.map((f) => (
+                    <FormField
+                      key={f.name}
+                      control={form.control}
+                      name={f.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{f.label}</FormLabel>
+                          <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger onBlur={field.onBlur}>
+                                <SelectValue placeholder={f.placeholder} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {f.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                </div>
+                  ))}
 
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    name='message'
-                    id='message'
-                    placeholder='Additional Information'
-                    rows={4}
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+                  <FormField
+                    control={form.control}
+                    name='color'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Appliance color</FormLabel>
+                        <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger onBlur={field.onBlur}>
+                              <SelectValue placeholder='Choose a color' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className='max-h-80'>
+                            {colors.map((color) => (
+                              <SelectItem key={color} value={color}>
+                                {color}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <Button type='submit' disabled={submitting}>
-                    {submitting ? 'Sending…' : 'Submit'}
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </dl>
+
+                <FormField
+                  control={form.control}
+                  name='instructions'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Special instructions</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          placeholder='Anything else we should know, including details for "Other" selections'
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type='submit' className='w-full' disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Sending…
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function ColorChartDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant='outline' className='w-full'>
+          <Palette className='mr-2 h-4 w-4' />
+          View Color Chart
+        </Button>
+      </DialogTrigger>
+      <DialogContent className='max-w-4xl'>
+        <DialogHeader>
+          <DialogTitle>Appliance color chart</DialogTitle>
+          <DialogDescription>
+            Pick a color with your patient, then choose it in the form.
+          </DialogDescription>
+        </DialogHeader>
+        <Image
+          src='/color-chart.jpeg'
+          alt='Appliance color chart'
+          width={4032}
+          height={3024}
+          sizes='(min-width: 1024px) 896px, 100vw'
+          className='h-auto w-full rounded-md'
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
