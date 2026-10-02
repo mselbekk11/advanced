@@ -84,4 +84,22 @@ describe('formatDate', () => {
     expect(formatDate('')).toBe('');
     expect(formatDate(undefined)).toBe('');
   });
+
+  it('lists every scan with its name, readable size and download link', async () => {
+    const html = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />);
+    const text = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />, { plainText: true });
+    for (const scan of RxOwnerEmail.PreviewProps.scans) {
+      expect(html).toContain(`data-scan="${scan.fileName}"`);
+      expect(html).toContain(`href="${scan.url}"`);
+    }
+    expect(text).toContain('46 MB');
+    expect(text).toContain('203 MB');
+  });
+
+  it('says no scans were attached when there are none', async () => {
+    const html = await render(<RxOwnerEmail submission={sample} />);
+    expect(html).toContain('data-section="scans"');
+    expect(html).toContain('None attached');
+    expect(html).not.toContain('data-scan=');
+  });
 });

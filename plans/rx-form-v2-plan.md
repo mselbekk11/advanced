@@ -49,8 +49,8 @@ These decisions apply to every phase:
 
 ## Progress & handoff notes
 
-- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`). Phase 5 (`23039b2`, arch drawing → Convex storage → inline CID image in the owner email). All pushed to `v2`.
-- **Waiting on the developer (manual checks):** Phase 3 callout look on desktop/mobile Preview; Phase 4 `[STAGING] New RX: Layout Check — Dr. Phase4` in Gmail web + mobile; Phase 5 `[STAGING] New RX: Drawing Check — Dr. Phase5` shows the drawing in Gmail without "display images", and drawing with finger/stylus on a phone or tablet doesn't scroll the page. **Next: Phase 6.**
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`). Phase 5 (`23039b2`, arch drawing → Convex storage → inline CID image in the owner email). Phase 6 (scan uploads + owner email Scans section + hourly orphaned-upload sweep). All pushed to `v2`.
+- **Waiting on the developer (manual checks):** Phase 3 callout look on desktop/mobile Preview; Phase 4 `[STAGING] New RX: Layout Check — Dr. Phase4` in Gmail web + mobile; Phase 5 `[STAGING] New RX: Drawing Check — Dr. Phase5` shows the drawing in Gmail without "display images", and drawing with finger/stylus on a phone or tablet doesn't scroll the page. Phase 6: on the Preview, upload a ~200 MB scan in the browser (progress bar, remove, retry after toggling the network off), and check that `[STAGING] New RX: Scan Check — Dr. Phase6` lists 2 scans whose Download links work. **Next: Phase 7.**
 - **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
 - **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
 - **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
@@ -66,7 +66,9 @@ These decisions apply to every phase:
   - The local Vercel CLI is logged into a different account than the project owner (`mselbekk11s-projects`), so build logs must come from the user.
   - The Resend component's `sendEmail` uses the batch API, which has **no attachments**. Owner emails *with* a drawing go through `resend.sendEmailManually` + the `resend` SDK (`attachments[].contentId`); `sendOwnerRxEmail` retries those itself (`MANUAL_RETRY_DELAYS_MS`). Emails without a drawing still use the queued `sendEmail` path.
   - Drawing: `app/components/RXForm/ArchDrawing.tsx` (react-sketch-canvas v8, `eraserMode='stroke'`, exported at 776x906 with the arch background). Rules/constants in `convex/lib/drawing.ts`. Upload URL: `rxSubmissions.generateUploadUrl`.
-  - **Phase 6:** a throwing mutation rolls back `ctx.storage.delete`, so rejected or abandoned uploads (bad drawing, invalid scans, a doctor who leaves mid-upload) can't be cleaned up in `submit`. Add a scheduled sweep that deletes `_storage` files older than ~1 day that no submission references.
+  - A throwing mutation rolls back `ctx.storage.delete`, so `submit` can't delete rejected uploads. Instead `convex/storage.ts` `sweepOrphanedUploads` (hourly cron in `convex/crons.ts`) deletes `_storage` files 1–3 days old that no submission references (drawing or scans). This covers rejected, removed and abandoned uploads. The "Remove" button only drops the file from the list.
+  - Scans: rules in `convex/lib/scans.ts`. The browser sets the upload Content-Type from the extension (`.stl` → `model/stl`, `.ply` → `model/x-ply`) because browsers report inconsistent types. The server checks the stored type and size against the file name (`scanUploadProblem`) and takes size/contentType from storage metadata, not the client. UI: `app/components/RXForm/ScanUpload.tsx` (XHR for progress; submit is blocked while uploading or while any upload has failed).
+  - Scan links are `ctx.storage.getUrl` URLs (`https://<deployment>.convex.cloud/api/storage/<uuid>`). They are served with the stored content type and no Content-Disposition, so the downloaded file is named by its UUID rather than the original name; the email shows the real name next to each link. Serving through an HTTP action to fix the name isn't possible (20 MB response limit).
   - To inspect stored files locally: `npx convex export --include-file-storage --path <zip>`.
   - `convex logs` streams forever; don't run it in the foreground.
   - Email previews: `npm run email` (React Email dev server on http://localhost:3001; `@react-email/ui` pulls its own Next 16/React 19, nested, so the site stays on Next 14/React 18).
@@ -223,6 +225,10 @@ Resend's SDK (6.32) supports inline attachments: `attachments: [{ content, filen
 - On submit, check each file's type and size again on the server using its storage metadata. Reject and delete invalid files.
 - Save scan metadata in `scans`.
 - Add a "Scans" section to the owner email, with one row per file: name, readable size and a permanent download link.
+
+### Spike result
+
+A 200 MB (209,715,200-byte) file POSTed to a `generateUploadUrl` URL on the dev deployment returned 200 (it took ~4 min on the developer's ~0.9 MB/s uplink). Storage metadata kept `size` and the `Content-Type` sent with the upload (`model/stl`). Its `getUrl` link downloads the full file (200, `model/stl`). No size limit was hit, so no chunking is needed.
 
 ### Acceptance criteria
 

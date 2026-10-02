@@ -5,7 +5,7 @@ import { useMutation } from 'convex/react';
 import { ConvexError } from 'convex/values';
 import { Download, FileText, Loader2, Palette } from 'lucide-react';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useForm, type FieldPath } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -43,6 +43,7 @@ import type { Id } from '@/convex/_generated/dataModel';
 import { applianceGroups, clasps, colors, positions, springs } from '@/convex/lib/rxOptions';
 import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
 import { ArchDrawing, type ArchDrawingHandle } from './ArchDrawing';
+import { ScanUpload, type ScanUploadHandle, type ScanUploadState } from './ScanUpload';
 
 type RxFormValues = z.input<typeof rxSubmissionSchema>;
 
@@ -110,21 +111,32 @@ export default function Rxform() {
   const submitRx = useMutation(api.rxSubmissions.submit);
   const generateUploadUrl = useMutation(api.rxSubmissions.generateUploadUrl);
   const drawingRef = useRef<ArchDrawingHandle>(null);
+  const scansRef = useRef<ScanUploadHandle>(null);
+  const [scanState, setScanState] = useState<ScanUploadState>({ uploading: 0, failed: 0 });
+  const onScanStateChange = useCallback((state: ScanUploadState) => setScanState(state), []);
   const form = useForm<RxFormValues>({
     resolver: zodResolver(rxSubmissionSchema),
     defaultValues: emptyValues,
   });
   const submitting = form.formState.isSubmitting;
   const today = new Date().toISOString().slice(0, 10);
+  const scansBlocking =
+    scanState.uploading > 0
+      ? `Please wait for ${scanState.uploading === 1 ? 'your scan' : `${scanState.uploading} scans`} to finish uploading.`
+      : scanState.failed > 0
+        ? 'Retry or remove the scans that failed to upload.'
+        : null;
 
   const onSubmit = async (values: RxFormValues) => {
     try {
       const drawing = drawingRef.current?.hasDrawing()
         ? await uploadDrawing(await drawingRef.current.exportPng())
         : undefined;
-      await submitRx({ ...rxSubmissionSchema.parse(values), drawing });
+      const scans = scansRef.current?.scans() ?? [];
+      await submitRx({ ...rxSubmissionSchema.parse(values), drawing, scans });
       form.reset(emptyValues);
       drawingRef.current?.reset();
+      scansRef.current?.reset();
       toast.success('Form sent! We will be in touch shortly!');
     } catch (err) {
       console.error('RX submission failed', err);
@@ -136,8 +148,14 @@ export default function Rxform() {
       issues?.forEach((issue) =>
         form.setError(issue.path as FieldPath<RxFormValues>, { message: issue.message })
       );
+      // Problems not tied to a field (e.g. a rejected scan) go in the toast.
+      const message =
+        err instanceof ConvexError && !issues?.length
+          ? (err.data as { message?: string }).message
+          : undefined;
       toast.error(
-        'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.'
+        'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.',
+        { description: message }
       );
     }
   };
@@ -335,7 +353,20 @@ export default function Rxform() {
                   )}
                 />
 
-                <Button type='submit' className='w-full' disabled={submitting}>
+                <div className='space-y-2'>
+                  <p className='text-sm font-medium leading-none'>Scans</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Optional. Attach intraoral scans, or send them with iTero (lab code 26235) or 3Shape.
+                  </p>
+                  <ScanUpload ref={scansRef} disabled={submitting} onStateChange={onScanStateChange} />
+                </div>
+
+                {scansBlocking && (
+                  <p role='status' className='text-sm text-muted-foreground'>
+                    {scansBlocking}
+                  </p>
+                )}
+                <Button type='submit' className='w-full' disabled={submitting || !!scansBlocking}>
                   {submitting ? (
                     <>
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />

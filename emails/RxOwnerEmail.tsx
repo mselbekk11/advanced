@@ -5,6 +5,7 @@ import {
   Head,
   Html,
   Img,
+  Link,
   Preview,
   Row,
   Section,
@@ -13,6 +14,7 @@ import {
 import type { CSSProperties, ReactNode } from 'react';
 import { applianceGroups, clasps, OTHER_APPLIANCE, positions, springs } from '../convex/lib/rxOptions';
 import type { RxSubmissionInput } from '../convex/lib/rxSubmission';
+import { formatBytes } from '../convex/lib/scans';
 
 // Owner notification laid out like the paper RX form (public/rx-form.pdf).
 // Built from tables (Section/Row/Column) and inline styles so it holds up in
@@ -29,13 +31,17 @@ const rule = '#d6d0ee';
 
 const font = 'Helvetica, Arial, sans-serif';
 
+export type EmailScan = { fileName: string; size: number; url: string };
+
 type Props = {
   submission: RxSubmissionInput;
-  // Image shown in the left column. Phase 5 passes the doctor's drawing.
+  // Image shown in the left column: the doctor's drawing, or the blank arch.
   archImageUrl?: string;
+  // Uploaded scans with their permanent download links.
+  scans?: EmailScan[];
 };
 
-export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL }: Props) {
+export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL, scans = [] }: Props) {
   const s = submission;
   const address = [s.street, [s.city, s.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 
@@ -161,6 +167,46 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
               <Text style={{ ...value, margin: '6px 0 0', whiteSpace: 'pre-wrap' }} data-field='instructions'>
                 {s.instructions || '—'}
               </Text>
+            </Section>
+          </Section>
+
+          {/* Scans: one row per uploaded file, with its download link */}
+          <Section style={{ padding: '0 20px 16px' }} data-section='scans'>
+            <Section style={{ border: `2px solid ${purple}`, borderRadius: 8, padding: '8px 12px' }}>
+              <Text style={{ ...label, margin: 0 }}>SCANS:</Text>
+              {scans.length === 0 ? (
+                <Text style={{ ...value, margin: '6px 0 0' }}>None attached</Text>
+              ) : (
+                scans.map((scan, i) => (
+                  <Row
+                    key={scan.url}
+                    data-scan={scan.fileName}
+                    style={i < scans.length - 1 ? { borderBottom: `1px solid ${rule}` } : undefined}
+                  >
+                    <Column style={{ padding: '6px 8px 6px 0', verticalAlign: 'middle' }}>
+                      <Text style={{ ...value, margin: 0, wordBreak: 'break-all' }}>{scan.fileName}</Text>
+                      <Text style={{ ...small, margin: 0 }}>{formatBytes(scan.size)}</Text>
+                    </Column>
+                    <Column style={{ width: 90, padding: '6px 0', verticalAlign: 'middle', textAlign: 'right' }}>
+                      <Link
+                        href={scan.url}
+                        style={{
+                          display: 'inline-block',
+                          padding: '6px 12px',
+                          backgroundColor: purple,
+                          color: '#ffffff',
+                          borderRadius: 4,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        Download
+                      </Link>
+                    </Column>
+                  </Row>
+                ))
+              )}
             </Section>
           </Section>
 
@@ -327,4 +373,8 @@ RxOwnerEmail.PreviewProps = {
     color: 'Purple',
     instructions: 'Please add a bite plane.',
   },
+  scans: [
+    { fileName: 'alex-doe-upper.stl', size: 48_234_496, url: 'https://example.convex.cloud/api/storage/upper' },
+    { fileName: 'alex-doe-lower.ply', size: 212_860_928, url: 'https://example.convex.cloud/api/storage/lower' },
+  ],
 } satisfies Props;

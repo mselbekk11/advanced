@@ -3,9 +3,9 @@
 import { render } from '@react-email/render';
 import { v } from 'convex/values';
 import { Resend as ResendApi } from 'resend';
-import RxOwnerEmail from '../emails/RxOwnerEmail';
+import RxOwnerEmail, { type EmailScan } from '../emails/RxOwnerEmail';
 import { internal } from './_generated/api';
-import type { Id } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 import { internalAction, type ActionCtx } from './_generated/server';
 import { DRAWING_CID } from './lib/drawing';
 import { ownerAddress, routeEmail } from './lib/emailRouting';
@@ -34,10 +34,12 @@ export const sendOwnerRxEmail = internalAction({
         subject: ownerRxSubject(submission),
       });
       const drawing = submission.drawing ? await loadDrawing(ctx, submission.drawing) : null;
+      const scans = await scanLinks(ctx, submission.scans ?? []);
       const html = await render(
         <RxOwnerEmail
           submission={submission}
           archImageUrl={drawing ? `cid:${DRAWING_CID}` : undefined}
+          scans={scans}
         />
       );
       const idempotencyKey = `owner-rx:${submissionId}`;
@@ -106,6 +108,17 @@ async function loadDrawing(ctx: ActionCtx, id: Id<'_storage'>) {
     return null;
   }
   return Buffer.from(await blob.arrayBuffer());
+}
+
+// Permanent, unguessable storage URLs the owner downloads the scans from.
+async function scanLinks(ctx: ActionCtx, scans: Doc<'rxSubmissions'>['scans'] & {}) {
+  const links: EmailScan[] = [];
+  for (const scan of scans) {
+    const url = await ctx.storage.getUrl(scan.storageId);
+    if (!url) throw new Error(`Scan ${scan.storageId} (${scan.fileName}) is missing from storage`);
+    links.push({ fileName: scan.fileName, size: scan.size, url });
+  }
+  return links;
 }
 
 function resendApi() {

@@ -8,14 +8,17 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as emails from "../emails.js";
 import type * as http from "../http.js";
 import type * as lib_drawing from "../lib/drawing.js";
 import type * as lib_emailRouting from "../lib/emailRouting.js";
 import type * as lib_rxOptions from "../lib/rxOptions.js";
 import type * as lib_rxSubmission from "../lib/rxSubmission.js";
+import type * as lib_scans from "../lib/scans.js";
 import type * as resend from "../resend.js";
 import type * as rxSubmissions from "../rxSubmissions.js";
+import type * as storage from "../storage.js";
 
 import type {
   ApiFromModules,
@@ -24,14 +27,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   emails: typeof emails;
   http: typeof http;
   "lib/drawing": typeof lib_drawing;
   "lib/emailRouting": typeof lib_emailRouting;
   "lib/rxOptions": typeof lib_rxOptions;
   "lib/rxSubmission": typeof lib_rxSubmission;
+  "lib/scans": typeof lib_scans;
   resend: typeof resend;
   rxSubmissions: typeof rxSubmissions;
+  storage: typeof storage;
 }>;
 
 /**
