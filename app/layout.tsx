@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-// import { Navbar } from './components/Navbar';
 import { NavbarTwo } from './components/NavbarTwo';
 import FooterTwo from './components/Home/FooterTwo';
-import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 import { ConvexClientProvider } from './ConvexClientProvider';
@@ -27,8 +25,6 @@ export default function RootLayout({
     <html lang='en'>
       <body className={inter.className}>
         <ConvexClientProvider>
-          {/* <Navbar /> */}
-          <ToastContainer />
           <NavbarTwo />
           {children}
           <Analytics />
