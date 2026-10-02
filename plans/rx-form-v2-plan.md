@@ -49,7 +49,7 @@ These decisions apply to every phase:
 
 ## Progress & handoff notes
 
-- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked). **Next: Phase 4.**
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (paper-form owner email in `emails/RxOwnerEmail.tsx`; Gmail check on a real staging send still to be confirmed by the developer). **Next: Phase 5.**
 - **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
 - **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
 - **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
@@ -65,6 +65,9 @@ These decisions apply to every phase:
   - The local Vercel CLI is logged into a different account than the project owner (`mselbekk11s-projects`), so build logs must come from the user.
   - **Phase 5:** the Resend component's `sendEmail` uses the batch API, which has **no attachments**. Inline CID images need `resend.sendEmailManually`.
   - `convex logs` streams forever; don't run it in the foreground.
+  - Email previews: `npm run email` (React Email dev server on http://localhost:3001; `@react-email/ui` pulls its own Next 16/React 19, nested, so the site stays on Next 14/React 18).
+  - Email images must be absolute URLs and not SVG (Gmail). The blank arch loads from `https://www.advancedortholabsf.com/mouth.png` (production site; the Preview is behind login). The logo is a text wordmark. `RxOwnerEmail` takes an optional `archImageUrl` for phase 5's drawing.
+  - Template tests find checkbox state via `data-option="<field>:<option>"` / `data-checked` attributes on each row.
 
 ---
 
