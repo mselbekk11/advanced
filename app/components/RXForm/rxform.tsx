@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from 'convex/react';
 import { ConvexError } from 'convex/values';
-import { Download, Loader2, Palette } from 'lucide-react';
+import { Download, FileText, Loader2, Palette } from 'lucide-react';
 import Image from 'next/image';
 import { useForm, type FieldPath } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -149,19 +149,11 @@ export default function Rxform() {
           </p>
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <div className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
+          <PaperFormCallout />
+          <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
             <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
               <Image src='/mouth.png' alt='teeth diagram' width='400' height='500' />
-              <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
-                <Button variant='outline' className='w-full' asChild>
-                  <a
-                    href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7J6b3uyMEHgFZOARtxbkeGYJsXWdj1zLyU42'
-                    target='_blank'
-                  >
-                    <Download className='mr-2 h-4 w-4' />
-                    Download Form
-                  </a>
-                </Button>
+              <div className='mt-8 w-full sm:w-auto'>
                 <ColorChartDialog />
               </div>
             </div>
@@ -367,5 +359,29 @@ function ColorChartDialog() {
         />
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PaperFormCallout() {
+  return (
+    <div className='flex flex-col gap-4 rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-6 sm:flex-row sm:items-center sm:justify-between'>
+      <div className='flex items-start gap-4'>
+        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div>
+        <div>
+          <p className='font-semibold text-gray-900'>Prefer paper? Download the RX form</p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button className='w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto' asChild>
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download PDF
+        </a>
+      </Button>
+    </div>
   );
 }
