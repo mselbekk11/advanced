@@ -29,7 +29,7 @@ export default defineSchema({
     spring: v.optional(v.string()),
     color: v.optional(v.string()),
     instructions: v.optional(v.string()),
-    // Filled in by later phases (drawing on the arch, scan uploads).
+    // Arch drawing flattened onto mouth.png (PNG). Scans are filled in by phase 6.
     drawing: v.optional(v.id('_storage')),
     scans: v.optional(
       v.array(

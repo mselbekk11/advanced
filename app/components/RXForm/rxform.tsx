@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 import { ConvexError } from 'convex/values';
 import { Download, FileText, Loader2, Palette } from 'lucide-react';
 import Image from 'next/image';
+import { useRef } from 'react';
 import { useForm, type FieldPath } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -38,8 +39,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { applianceGroups, clasps, colors, positions, springs } from '@/convex/lib/rxOptions';
 import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
+import { ArchDrawing, type ArchDrawingHandle } from './ArchDrawing';
 
 type RxFormValues = z.input<typeof rxSubmissionSchema>;
 
@@ -105,6 +108,8 @@ function RequiredMark() {
 
 export default function Rxform() {
   const submitRx = useMutation(api.rxSubmissions.submit);
+  const generateUploadUrl = useMutation(api.rxSubmissions.generateUploadUrl);
+  const drawingRef = useRef<ArchDrawingHandle>(null);
   const form = useForm<RxFormValues>({
     resolver: zodResolver(rxSubmissionSchema),
     defaultValues: emptyValues,
@@ -114,8 +119,12 @@ export default function Rxform() {
 
   const onSubmit = async (values: RxFormValues) => {
     try {
-      await submitRx(rxSubmissionSchema.parse(values));
+      const drawing = drawingRef.current?.hasDrawing()
+        ? await uploadDrawing(await drawingRef.current.exportPng())
+        : undefined;
+      await submitRx({ ...rxSubmissionSchema.parse(values), drawing });
       form.reset(emptyValues);
+      drawingRef.current?.reset();
       toast.success('Form sent! We will be in touch shortly!');
     } catch (err) {
       console.error('RX submission failed', err);
@@ -132,6 +141,18 @@ export default function Rxform() {
       );
     }
   };
+
+  // Uploads the flattened drawing straight to Convex storage.
+  async function uploadDrawing(png: Blob) {
+    const res = await fetch(await generateUploadUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': png.type || 'image/png' },
+      body: png,
+    });
+    if (!res.ok) throw new Error(`Drawing upload failed (${res.status})`);
+    const { storageId } = (await res.json()) as { storageId: Id<'_storage'> };
+    return storageId;
+  }
 
   return (
     <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-44 lg:pt-48'>
@@ -152,7 +173,7 @@ export default function Rxform() {
           <PaperFormCallout />
           <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
             <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
-              <Image src='/mouth.png' alt='teeth diagram' width='400' height='500' />
+              <ArchDrawing ref={drawingRef} disabled={submitting} />
               <div className='mt-8 w-full sm:w-auto'>
                 <ColorChartDialog />
               </div>

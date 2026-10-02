@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@react-email/render';
+import { DRAWING_CID } from '../convex/lib/drawing';
 import { appliances, OTHER_APPLIANCE } from '../convex/lib/rxOptions';
 import RxOwnerEmail, { BLANK_ARCH_URL, formatDate } from './RxOwnerEmail';
 
@@ -47,6 +48,14 @@ describe('RxOwnerEmail', () => {
   it('shows the blank arch by default', async () => {
     const html = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />);
     expect(html).toContain(`src="${BLANK_ARCH_URL}"`);
+  });
+
+  it('shows the drawing via its inline CID reference when one is passed', async () => {
+    const html = await render(
+      <RxOwnerEmail {...RxOwnerEmail.PreviewProps} archImageUrl={`cid:${DRAWING_CID}`} />
+    );
+    expect(html).toContain('src="cid:rx-drawing"');
+    expect(html).not.toContain(BLANK_ARCH_URL);
   });
 
   it('shows the instructions next to "Other" when Other is chosen', async () => {

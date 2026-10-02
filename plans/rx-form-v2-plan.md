@@ -49,7 +49,7 @@ These decisions apply to every phase:
 
 ## Progress & handoff notes
 
-- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`; template deployed to dev Convex and a test submission "Layout Check" sent; Gmail web/mobile check still to be confirmed by the developer). All pushed to `v2`. **Next: Phase 5.**
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`; template deployed to dev Convex and a test submission "Layout Check" sent; Gmail web/mobile check still to be confirmed by the developer). All pushed to `v2`. Phase 5 (arch drawing → Convex storage → inline CID image in the owner email; Gmail rendering of the CID drawing still to be confirmed by the developer on the "Drawing Check" test send). **Next: Phase 6.**
 - **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
 - **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
 - **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
@@ -63,7 +63,10 @@ These decisions apply to every phase:
   - The delivery date uses a native `<input type="date">` rather than shadcn Calendar; react-day-picker v10 is incompatible with shadcn 2.3.0.
   - Production Vercel project setting is still Node 20.x; `package.json` engines pins 24.x on `v2`.
   - The local Vercel CLI is logged into a different account than the project owner (`mselbekk11s-projects`), so build logs must come from the user.
-  - **Phase 5:** the Resend component's `sendEmail` uses the batch API, which has **no attachments**. Inline CID images need `resend.sendEmailManually`.
+  - The Resend component's `sendEmail` uses the batch API, which has **no attachments**. Owner emails *with* a drawing go through `resend.sendEmailManually` + the `resend` SDK (`attachments[].contentId`); `sendOwnerRxEmail` retries those itself (`MANUAL_RETRY_DELAYS_MS`). Emails without a drawing still use the queued `sendEmail` path.
+  - Drawing: `app/components/RXForm/ArchDrawing.tsx` (react-sketch-canvas v8, `eraserMode='stroke'`, exported at 776x906 with the arch background). Rules/constants in `convex/lib/drawing.ts`. Upload URL: `rxSubmissions.generateUploadUrl`.
+  - **Phase 6:** a throwing mutation rolls back `ctx.storage.delete`, so rejected or abandoned uploads (bad drawing, invalid scans, a doctor who leaves mid-upload) can't be cleaned up in `submit`. Add a scheduled sweep that deletes `_storage` files older than ~1 day that no submission references.
+  - To inspect stored files locally: `npx convex export --include-file-storage --path <zip>`.
   - `convex logs` streams forever; don't run it in the foreground.
   - Email previews: `npm run email` (React Email dev server on http://localhost:3001; `@react-email/ui` pulls its own Next 16/React 19, nested, so the site stays on Next 14/React 18).
   - Email images must be absolute URLs and not SVG (Gmail). The blank arch loads from `https://www.advancedortholabsf.com/mouth.png` (production site; the Preview is behind login). The logo is a text wordmark. `RxOwnerEmail` takes an optional `archImageUrl` for phase 5's drawing.
@@ -186,6 +189,10 @@ Set up local React Email previews using sample data.
 - Add a drawing layer over `mouth.png`, with pen, eraser, undo, redo, clear, 2–3 colours and 1–2 widths. It must work with mouse, touch and stylus, and drawing must not scroll the page.
 - On submit, if the doctor drew anything, merge the drawing with the arch image into one PNG and upload it to Convex storage. Save the storage id as `drawing` on the submission.
 - Embed the drawing in the left column of the owner email. If nothing was drawn, show the blank arch.
+
+### Spike result
+
+Resend's SDK (6.32) supports inline attachments: `attachments: [{ content, filename, contentType, contentId }]`, referenced in HTML as `src="cid:<contentId>"`. CID was kept (no hosted-URL fallback). A test submission with a drawing was accepted by Resend (`ownerEmailStatus: sent`). Whether Gmail renders it without "display images" must be checked in the staging inbox.
 
 ### Acceptance criteria
 
