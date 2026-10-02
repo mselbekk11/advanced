@@ -49,7 +49,7 @@ These decisions apply to every phase:
 
 ## Progress & handoff notes
 
-- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (paper-form owner email in `emails/RxOwnerEmail.tsx`; Gmail check on a real staging send still to be confirmed by the developer). **Next: Phase 5.**
+- **Done:** Phase 1 (`6e0d66c`, Node 24 pin `6fbe8fd`), Phase 2 (`e861305`), Phase 3 (`d0793d5`, PDF callout, `PaperFormCallout` in `rxform.tsx`; `public/rx-form.pdf` now tracked), Phase 4 (`9a5c207`, paper-form owner email in `emails/RxOwnerEmail.tsx`; template deployed to dev Convex and a test submission "Layout Check" sent; Gmail web/mobile check still to be confirmed by the developer). All pushed to `v2`. **Next: Phase 5.**
 - **Branch:** `v2` (pushed). Vercel Preview builds on push; Preview has `NEXT_PUBLIC_CONVEX_URL`. Preview is behind Vercel login protection.
 - **Convex:** project `advanced-ortho-lab`, dev deployment `glad-mole-195` (https://glad-mole-195.convex.cloud). The Preview uses this dev deployment; push function changes with `npx convex dev --once` (no Convex deploy in the Vercel build yet; that's phase 10).
 - **Convex env (dev):** `RESEND_API_KEY`, `EMAIL_FROM` (`Advanced Ortho Lab RX <onboarding@resend.dev>`), `EMAIL_TO_OWNER` (`advancedortholabsf@gmail.com`), `EMAIL_OVERRIDE_TO` (developer's Resend-account inbox). `RESEND_WEBHOOK_SECRET` not set (webhook optional).
