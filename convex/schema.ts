@@ -65,6 +65,18 @@ export default defineSchema({
     .index('by_ownerEmailId', ['ownerEmailId'])
     .index('by_doctorEmailId', ['doctorEmailId']),
 
+  // Footer contact-form messages, each emailed to the owner.
+  contactMessages: defineTable({
+    first: v.string(),
+    last: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    message: v.string(),
+    emailStatus: vEmailStatus,
+    emailId: v.optional(v.string()),
+    emailError: v.optional(v.string()),
+  }).index('by_emailId', ['emailId']),
+
   // Every scan upload token handed out, so submit only accepts our own
   // uploads and the sweep can delete the ones never submitted.
   scanUploads: defineTable({

@@ -1,53 +1,87 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   BuildingOffice2Icon,
   EnvelopeIcon,
   PhoneIcon,
 } from '@heroicons/react/24/outline';
-import { FormEvent, useState } from 'react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useMutation } from 'convex/react';
+import { ConvexError } from 'convex/values';
+import { Loader2 } from 'lucide-react';
+import { useForm, type FieldPath } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/convex/_generated/api';
+import { contactMessageSchema } from '@/convex/lib/contactMessage';
+
+type ContactValues = z.input<typeof contactMessageSchema>;
+
+const emptyValues: ContactValues = { first: '', last: '', email: '', phone: '', message: '' };
+
+type FieldConfig = {
+  name: FieldPath<ContactValues>;
+  label: string;
+  required?: boolean;
+  type?: string;
+  autoComplete?: string;
+  wide?: boolean;
+};
+
+const fields: FieldConfig[] = [
+  { name: 'first', label: 'First name', required: true, autoComplete: 'given-name' },
+  { name: 'last', label: 'Last name', required: true, autoComplete: 'family-name' },
+  { name: 'email', label: 'Email', required: true, type: 'email', autoComplete: 'email', wide: true },
+  { name: 'phone', label: 'Phone number', type: 'tel', autoComplete: 'tel', wide: true },
+];
+
+function RequiredMark() {
+  return (
+    <span aria-hidden className='text-destructive'>
+      {' '}
+      *
+    </span>
+  );
+}
 
 export default function ContactForm() {
-  const [first, setFirst] = useState('');
-  const [last, setLast] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
+  const sendMessage = useMutation(api.contactMessages.submit);
+  const form = useForm<ContactValues>({
+    resolver: zodResolver(contactMessageSchema),
+    defaultValues: emptyValues,
+  });
+  const submitting = form.formState.isSubmitting;
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    console.log('Data', first, last, email, phone, message);
-
+  const onSubmit = async (values: ContactValues) => {
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        body: JSON.stringify({
-          first,
-          last,
-          email,
-          phone,
-          message,
-        }),
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
-
-      setFirst('');
-      setLast('');
-      setEmail('');
-      setPhone('');
-      setMessage('');
-    } catch (err: any) {
-      console.log('Err', err);
+      await sendMessage(contactMessageSchema.parse(values));
+      form.reset(emptyValues);
+      toast.success('Message sent. Thank you for reaching out!');
+    } catch (err) {
+      console.error('Contact message failed', err);
+      const issues =
+        err instanceof ConvexError
+          ? (err.data as { issues?: { path: string; message: string }[] }).issues
+          : undefined;
+      issues?.forEach((issue) =>
+        form.setError(issue.path as FieldPath<ContactValues>, { message: issue.message })
+      );
+      toast.error(
+        'Sorry, your message could not be sent. Please try again or email us at advancedortholabsf@gmail.com.'
+      );
     }
-  };
-
-  const showToast = () => {
-    toast.success('Message sent. Thank you for reaching out!');
   };
 
   return (
@@ -109,7 +143,7 @@ export default function ContactForm() {
                 <dd>
                   <a
                     className='hover:text-gray-900'
-                    href='mailto:hello@example.com'
+                    href='mailto:advancedortholabsf@gmail.com'
                   >
                     advancedortholabsf@gmail.com
                   </a>
@@ -155,125 +189,66 @@ export default function ContactForm() {
 
         {/* FORM */}
 
-        <form
-          onSubmit={onSubmit}
-          // onClick={notify}
-          action='#'
-          method='POST'
-          className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'
-        >
-          <div className='mx-auto max-w-xl lg:mr-0 lg:max-w-lg'>
-            <div className='grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2'>
-              <div>
-                <label
-                  htmlFor='first-name'
-                  className='block text-sm font-semibold leading-6 text-gray-900'
-                >
-                  First name
-                </label>
-                <div className='mt-2.5'>
-                  <input
-                    type='text'
-                    value={first}
-                    onChange={(e) => setFirst(e.target.value)}
-                    name='first-name'
-                    id='first-name'
-                    autoComplete='given-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+        <Form {...form}>
+          <form
+            noValidate
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'
+          >
+            <div className='mx-auto max-w-xl lg:mr-0 lg:max-w-lg'>
+              <div className='grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2'>
+                {fields.map((f) => (
+                  <FormField
+                    key={f.name}
+                    control={form.control}
+                    name={f.name}
+                    render={({ field }) => (
+                      <FormItem className={f.wide ? 'sm:col-span-2' : undefined}>
+                        <FormLabel>
+                          {f.label}
+                          {f.required && <RequiredMark />}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type={f.type ?? 'text'}
+                            autoComplete={f.autoComplete}
+                            {...field}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
+                ))}
+
+                <FormField
+                  control={form.control}
+                  name='message'
+                  render={({ field }) => (
+                    <FormItem className='sm:col-span-2'>
+                      <FormLabel>
+                        Message
+                        <RequiredMark />
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea rows={4} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <div>
-                <label
-                  htmlFor='last-name'
-                  className='block text-sm font-semibold leading-6 text-gray-900'
-                >
-                  Last name
-                </label>
-                <div className='mt-2.5'>
-                  <input
-                    type='text'
-                    value={last}
-                    onChange={(e) => setLast(e.target.value)}
-                    name='last-name'
-                    id='last-name'
-                    autoComplete='family-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-semibold leading-6 text-gray-900'
-                >
-                  Email
-                </label>
-                <div className='mt-2.5'>
-                  <input
-                    type='email'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    name='email'
-                    id='email'
-                    autoComplete='email'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='phone-number'
-                  className='block text-sm font-semibold leading-6 text-gray-900'
-                >
-                  Phone number
-                </label>
-                <div className='mt-2.5'>
-                  <input
-                    type='tel'
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    name='phone-number'
-                    id='phone-number'
-                    autoComplete='tel'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
-              </div>
-
-              <div className='sm:col-span-2'>
-                <label
-                  htmlFor='message'
-                  className='block text-sm font-semibold leading-6 text-gray-900'
-                >
-                  Message
-                </label>
-                <div className='mt-2.5'>
-                  <textarea
-                    name='message'
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    id='message'
-                    rows={4}
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
+              <div className='mt-8 flex lg:justify-end justify-center'>
+                <Button type='submit' disabled={submitting}>
+                  {submitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                  {submitting ? 'Sending…' : 'Send message'}
+                </Button>
               </div>
             </div>
-
-            <div className='mt-8 flex lg:justify-end justify-center'>
-              <Button type='submit' onClick={showToast}>
-                Send message
-              </Button>
-            </div>
-          </div>
-        </form>
+          </form>
+        </Form>
       </div>
     </div>
   );

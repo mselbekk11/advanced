@@ -3,11 +3,13 @@
 import { render } from '@react-email/render';
 import { v } from 'convex/values';
 import { Resend as ResendApi } from 'resend';
+import ContactOwnerEmail from '../emails/ContactOwnerEmail';
 import RxDoctorEmail from '../emails/RxDoctorEmail';
 import RxOwnerEmail, { type EmailScan } from '../emails/RxOwnerEmail';
 import { internal } from './_generated/api';
 import type { Doc, Id } from './_generated/dataModel';
 import { internalAction, type ActionCtx } from './_generated/server';
+import { contactSubject } from './lib/contactMessage';
 import { DRAWING_CID } from './lib/drawing';
 import { ownerAddress, routeEmail } from './lib/emailRouting';
 import { doctorRxSubject, ownerRxSubject } from './lib/rxSubmission';
@@ -57,6 +59,36 @@ export const sendDoctorRxEmail = internalAction({
         />
       ),
     })),
+});
+
+// A footer contact-form message, to the owner. Replies go to the visitor. It
+// has no attachments, so it always goes through the component's queue, which
+// retries failed sends.
+export const sendContactEmail = internalAction({
+  args: { messageId: v.id('contactMessages') },
+  handler: async (ctx, { messageId }) => {
+    const message = await ctx.runQuery(internal.contactMessages.get, { id: messageId });
+    if (!message) throw new Error(`Contact message ${messageId} not found`);
+    try {
+      const { from, to, subject } = routeEmail(process.env, {
+        to: ownerAddress(process.env),
+        subject: contactSubject(message),
+      });
+      const emailId = await resend.sendEmail(ctx, {
+        from,
+        to,
+        subject,
+        html: await render(<ContactOwnerEmail message={message} />),
+        replyTo: [message.email],
+        idempotencyKey: `contact:${messageId}`,
+      });
+      await ctx.runMutation(internal.contactMessages.setEmailStatus, { id: messageId, status: 'queued', emailId });
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      await ctx.runMutation(internal.contactMessages.setEmailStatus, { id: messageId, status: 'failed', error });
+      throw err;
+    }
+  },
 });
 
 // Renders one RX email and sends it through the Resend component.

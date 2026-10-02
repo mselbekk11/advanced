@@ -16,8 +16,8 @@ const statusByEvent = {
   'email.failed': 'failed',
 } as const;
 
-// Mirrors Resend webhook delivery events onto the submission's owner or
-// doctor email status.
+// Mirrors Resend webhook delivery events onto the matching email status: an
+// RX submission's owner or doctor email, or a contact message.
 export const handleEmailEvent = internalMutation({
   args: vOnEmailEventArgs,
   handler: async (ctx, { id, event }) => {
@@ -32,6 +32,11 @@ export const handleEmailEvent = internalMutation({
       .query('rxSubmissions')
       .withIndex('by_doctorEmailId', (q) => q.eq('doctorEmailId', id))
       .unique();
-    if (doctor) await ctx.db.patch(doctor._id, { doctorEmailStatus: status });
+    if (doctor) return await ctx.db.patch(doctor._id, { doctorEmailStatus: status });
+    const contact = await ctx.db
+      .query('contactMessages')
+      .withIndex('by_emailId', (q) => q.eq('emailId', id))
+      .unique();
+    if (contact) await ctx.db.patch(contact._id, { emailStatus: status });
   },
 });
