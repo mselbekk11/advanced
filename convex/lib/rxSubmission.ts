@@ -16,7 +16,8 @@ export const rxSubmissionSchema = z.object({
   city: z.string().trim().optional(),
   zip: z.string().trim().optional(),
   patient: z.string().trim().min(1, 'Patient is required'),
-  deliveryDate: z.union([z.literal(''), z.iso.date('Enter a valid date')]).optional(),
+  // Shown to the doctor as "Due date"; the stored key predates the rename.
+  deliveryDate: z.iso.date('Choose a due date'),
   appliance: z.enum(appliances as [string, ...string[]], 'Choose an appliance'),
   position: optionalChoice(positions),
   clasp: optionalChoice(clasps),
@@ -26,6 +27,9 @@ export const rxSubmissionSchema = z.object({
 });
 
 export type RxSubmissionInput = z.infer<typeof rxSubmissionSchema>;
+
+// A stored submission. Rows saved before the due date became required may not have one.
+export type StoredRxSubmission = Omit<RxSubmissionInput, 'deliveryDate'> & { deliveryDate?: string };
 
 // Ordered, human-readable labels for every field, used by the email template.
 export const rxFieldLabels: [keyof RxSubmissionInput, string][] = [
@@ -37,7 +41,7 @@ export const rxFieldLabels: [keyof RxSubmissionInput, string][] = [
   ['city', 'City'],
   ['zip', 'ZIP'],
   ['patient', 'Patient'],
-  ['deliveryDate', 'Delivery date'],
+  ['deliveryDate', 'Due date'],
   ['appliance', 'Appliance'],
   ['position', 'Position'],
   ['clasp', 'Clasp'],

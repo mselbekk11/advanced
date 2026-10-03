@@ -11,7 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 import type { CSSProperties } from 'react';
-import type { RxSubmissionInput } from '../convex/lib/rxSubmission';
+import type { RxSubmissionInput, StoredRxSubmission } from '../convex/lib/rxSubmission';
 import { formatDate } from './RxOwnerEmail';
 
 // Confirmation sent to the doctor after an RX is saved: a thank-you, the order
@@ -25,7 +25,7 @@ const rule = '#e5e7eb';
 const font = 'Helvetica, Arial, sans-serif';
 
 type Props = {
-  submission: RxSubmissionInput;
+  submission: StoredRxSubmission;
   // The doctor's drawing on the arch (a `cid:` reference); omitted if none.
   drawingUrl?: string;
   scanFileNames?: string[];
@@ -33,7 +33,7 @@ type Props = {
 
 const orderFields: [keyof RxSubmissionInput, string][] = [
   ['patient', 'Patient'],
-  ['deliveryDate', 'Delivery date'],
+  ['deliveryDate', 'Due date'],
   ['appliance', 'Appliance'],
   ['position', 'Position'],
   ['clasp', 'Clasp'],

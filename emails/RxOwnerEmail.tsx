@@ -13,7 +13,7 @@ import {
 } from '@react-email/components';
 import type { CSSProperties, ReactNode } from 'react';
 import { applianceGroups, clasps, OTHER_APPLIANCE, positions, springs } from '../convex/lib/rxOptions';
-import type { RxSubmissionInput } from '../convex/lib/rxSubmission';
+import type { StoredRxSubmission } from '../convex/lib/rxSubmission';
 import { formatBytes } from '../convex/lib/scans';
 
 // Owner notification laid out like the paper RX form (public/rx-form.pdf).
@@ -35,7 +35,7 @@ const font = 'Helvetica, Arial, sans-serif';
 export type EmailScan = { fileName: string; size?: number; url?: string };
 
 type Props = {
-  submission: RxSubmissionInput;
+  submission: StoredRxSubmission;
   // Image shown in the left column: the doctor's drawing, or the blank arch.
   archImageUrl?: string;
   // Uploaded scans with their permanent download links.
@@ -73,7 +73,7 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
                 <HeaderField label='Phone' value={s.phone} />
                 <HeaderField label='Email' value={s.email} />
                 <HeaderField label='Patient' value={s.patient} />
-                <HeaderField label='Delivery date' value={formatDate(s.deliveryDate)} />
+                <HeaderField label='Due date' value={formatDate(s.deliveryDate)} />
               </Column>
             </Row>
           </Section>

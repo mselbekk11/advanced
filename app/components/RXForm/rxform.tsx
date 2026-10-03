@@ -189,8 +189,8 @@ export default function Rxform() {
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
           <PaperFormCallout />
-          <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
-            <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
+          <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2 lg:items-start'>
+            <div className='bg-white flex flex-col items-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8 lg:sticky lg:top-8'>
               <ArchDrawing ref={drawingRef} disabled={submitting} />
               <div className='mt-8 w-full sm:w-auto'>
                 <ColorChartDialog />
@@ -203,10 +203,6 @@ export default function Rxform() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg space-y-6'
               >
-                <p className='text-sm text-muted-foreground'>
-                  Fields marked <span className='text-destructive'>*</span> are required.
-                </p>
-
                 <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                   {textFields.map((f) => (
                     <FormField
@@ -238,7 +234,10 @@ export default function Rxform() {
                     name='deliveryDate'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Delivery date</FormLabel>
+                        <FormLabel>
+                          Due date
+                          <RequiredMark />
+                        </FormLabel>
                         <FormControl>
                           <Input type='date' min={today} {...field} value={field.value ?? ''} />
                         </FormControl>

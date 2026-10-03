@@ -18,7 +18,7 @@ export const submit = mutation({
     city: optional,
     zip: optional,
     patient: v.string(),
-    deliveryDate: optional,
+    deliveryDate: v.string(),
     appliance: v.string(),
     position: optional,
     clasp: optional,

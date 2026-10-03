@@ -60,7 +60,7 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
     return (
       <div className='w-full max-w-[400px]'>
         <p className='mb-2 text-center text-sm font-semibold text-indigo-600'>
-          Design case above <span className='font-normal text-gray-500'>(optional)</span>
+          Design appliance below <span className='font-normal text-gray-500'>(optional)</span>
         </p>
         <div
           className='relative w-full touch-none select-none overscroll-contain'
@@ -85,7 +85,7 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
           />
         </div>
 
-        <div className='mt-3 flex flex-wrap items-center justify-center gap-1' aria-label='Drawing tools'>
+        <div className='mt-3 flex w-full flex-wrap items-center justify-between gap-y-2' aria-label='Drawing tools'>
           <ToolButton label='Pen' active={!erasing} onClick={() => setMode(false)} disabled={disabled}>
             <Pencil className='h-4 w-4' />
           </ToolButton>
@@ -93,7 +93,7 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
             <Eraser className='h-4 w-4' />
           </ToolButton>
 
-          <span className='mx-0.5 h-6 w-px bg-gray-200' aria-hidden />
+          <span className='h-6 w-px bg-gray-200' aria-hidden />
 
           {penColors.map((c) => (
             <button
@@ -130,7 +130,7 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
             </ToolButton>
           ))}
 
-          <span className='mx-0.5 h-6 w-px bg-gray-200' aria-hidden />
+          <span className='h-6 w-px bg-gray-200' aria-hidden />
 
           <ToolButton label='Undo' onClick={() => canvas.current?.undo()} disabled={disabled}>
             <Undo2 className='h-4 w-4' />

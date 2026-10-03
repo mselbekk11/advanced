@@ -7,6 +7,7 @@ const valid = {
   email: 'jane@example.com',
   phone: '415-555-0100',
   patient: 'Alex Doe',
+  deliveryDate: '2026-10-20',
   appliance: 'Hawley Retainer U/L',
 };
 
@@ -15,7 +16,7 @@ describe('rxSubmissionSchema', () => {
     expect(rxSubmissionSchema.safeParse(valid).success).toBe(true);
   });
 
-  it.each(['first', 'last', 'email', 'phone', 'patient', 'appliance'] as const)(
+  it.each(['first', 'last', 'email', 'phone', 'patient', 'deliveryDate', 'appliance'] as const)(
     'rejects a missing %s',
     (field) => {
       const result = rxSubmissionSchema.safeParse({ ...valid, [field]: '' });
@@ -37,9 +38,8 @@ describe('rxSubmissionSchema', () => {
     expect(rxSubmissionSchema.safeParse({ ...valid, color: 'Turqouise' }).success).toBe(false);
   });
 
-  it('accepts an ISO delivery date and rejects other formats', () => {
+  it('accepts an ISO due date and rejects other formats', () => {
     expect(rxSubmissionSchema.safeParse({ ...valid, deliveryDate: '2026-10-20' }).success).toBe(true);
-    expect(rxSubmissionSchema.safeParse({ ...valid, deliveryDate: '' }).success).toBe(true);
     expect(rxSubmissionSchema.safeParse({ ...valid, deliveryDate: '10/20/2026' }).success).toBe(false);
   });
 
