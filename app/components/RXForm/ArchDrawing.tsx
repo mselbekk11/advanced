@@ -59,7 +59,7 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
 
     return (
       <div className='w-full max-w-[400px]'>
-        <p className='mb-2 text-center text-sm font-semibold text-indigo-600'>
+        <p className='mb-8 text-center text-sm font-semibold text-zinc-600'>
           Design appliance below <span className='font-normal text-gray-500'>(optional)</span>
         </p>
         <div
@@ -80,12 +80,12 @@ export const ArchDrawing = forwardRef<ArchDrawingHandle, { disabled?: boolean }>
             eraserMode='stroke'
             readOnly={disabled}
             onChange={(paths) => setStrokeCount(paths.filter((p) => p.drawMode).length)}
-            style={{ border: '1px solid #e5e7eb', borderRadius: 8, touchAction: 'none' }}
+            style={{ border: '', borderRadius: 8, touchAction: 'none' }}
             svgStyle={{ touchAction: 'none' }}
           />
         </div>
 
-        <div className='mt-3 flex w-full flex-wrap items-center justify-between gap-y-2' aria-label='Drawing tools'>
+        <div className='mt-8 flex w-full flex-wrap items-center justify-between gap-y-2 rounded-md border border-gray-200 p-2 shadow-md' aria-label='Drawing tools'>
           <ToolButton label='Pen' active={!erasing} onClick={() => setMode(false)} disabled={disabled}>
             <Pencil className='h-4 w-4' />
           </ToolButton>

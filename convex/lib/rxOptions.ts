@@ -36,11 +36,14 @@ export const applianceGroups = [
 
 export const appliances = applianceGroups.flatMap((g) => g.items);
 
+// Shown to the doctor as "Arch"; the stored `position` key predates the rename.
 export const positions = ['Upper', 'Lower', 'Both'] as const;
 
 export const clasps = ['Adams Clasp', 'Ball Clasp', 'C Clasp', 'Other - Specify Below'] as const;
 
-export const springs = ['Spring', 'Specify Type Below'] as const;
+// The form defaults to NO_SPRING. A spring's details go in the additional information.
+export const NO_SPRING = 'No Spring';
+export const springs = [NO_SPRING, 'Spring - Specify Below'] as const;
 
 export const colors = [
   'Any',

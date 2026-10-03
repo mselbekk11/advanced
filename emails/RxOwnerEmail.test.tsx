@@ -22,11 +22,12 @@ describe('RxOwnerEmail', () => {
     }
   });
 
-  it('ticks the chosen clasp, spring and position', async () => {
+  it('ticks the chosen clasp, spring and arch', async () => {
     const html = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />);
     expect(checkedState(html, 'clasp', 'Adams Clasp')).toBe('true');
     expect(checkedState(html, 'clasp', 'Ball Clasp')).toBe('false');
-    expect(checkedState(html, 'spring', 'Spring')).toBe('true');
+    expect(checkedState(html, 'spring', 'Spring - Specify Below')).toBe('true');
+    expect(checkedState(html, 'spring', 'No Spring')).toBe('false');
     expect(checkedState(html, 'position', 'Upper')).toBe('true');
     expect(checkedState(html, 'position', 'Both')).toBe('false');
   });
@@ -40,7 +41,10 @@ describe('RxOwnerEmail', () => {
     expect(text).toContain('Alex Doe');
     expect(text).toContain('Oct 20, 2026');
     expect(text).toContain('Purple');
-    expect(text).toContain('Please add a bite plane.');
+    expect(text).toContain('Please add a bite plane. Finger spring on UL2.');
+    expect(text).toContain('ADDITIONAL INFORMATION:');
+    expect(text).toContain('ARCH');
+    expect(text).not.toMatch(/position|special instructions/i);
     expect(text).toContain('APPLIANCES PRESCRIPTION');
     expect(text).toContain('OVER 45 YEARS OF EXCELLENCE');
   });
@@ -69,7 +73,7 @@ describe('RxOwnerEmail', () => {
     expect(html.match(/Twin block, see notes/g)?.length).toBe(2);
   });
 
-  it('shows a dash for empty optional fields', async () => {
+  it('shows a dash for empty fields (older rows may lack additional information)', async () => {
     const html = await render(
       <RxOwnerEmail submission={{ ...sample, color: '', instructions: undefined, deliveryDate: '' }} />
     );

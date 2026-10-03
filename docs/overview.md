@@ -93,7 +93,7 @@ Every page has `NavbarTwo` on top and `FooterTwo` (with the contact form) at the
 
 ### RX form
 
-1. The doctor fills the form. Validation is the zod schema in `convex/lib/rxSubmission.ts`; option lists (appliances grouped like the paper form, positions, clasps, springs, colours) come from `convex/lib/rxOptions.ts`. Required: doctor first/last name, email, phone, patient, appliance.
+1. The doctor fills the form. Validation is the zod schema in `convex/lib/rxSubmission.ts`; option lists (appliances grouped like the paper form, arches (stored as `position`), clasps, springs, colours) come from `convex/lib/rxOptions.ts`. Required: doctor first/last name, email, phone, patient, due date, appliance, spring (defaults to "No Spring") and additional information (stored as `instructions`).
 2. **Scans** (optional, `.stl`/`.ply`, ≤ 250 MB each) upload from the browser straight to Vercel Blob while the form is filled in, using a client token from `scanUploadsNode.createScanUpload`. Submit is disabled while uploads are running.
 3. On submit, a **drawing** (if any) is flattened onto the arch image and uploaded to Convex storage.
 4. `rxSubmissions.submit` validates everything again, checks the drawing and that each scan is one of our unclaimed uploads, saves the record, and schedules two emails as separate actions:

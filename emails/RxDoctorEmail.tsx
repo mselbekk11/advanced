@@ -11,7 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 import type { CSSProperties } from 'react';
-import type { RxSubmissionInput, StoredRxSubmission } from '../convex/lib/rxSubmission';
+import type { StoredRxSubmission } from '../convex/lib/rxSubmission';
 import { formatDate } from './RxOwnerEmail';
 
 // Confirmation sent to the doctor after an RX is saved: a thank-you, the order
@@ -31,15 +31,15 @@ type Props = {
   scanFileNames?: string[];
 };
 
-const orderFields: [keyof RxSubmissionInput, string][] = [
+const orderFields: [keyof StoredRxSubmission, string][] = [
   ['patient', 'Patient'],
   ['deliveryDate', 'Due date'],
   ['appliance', 'Appliance'],
-  ['position', 'Position'],
+  ['position', 'Arch'],
   ['clasp', 'Clasp'],
   ['spring', 'Spring'],
   ['color', 'Color'],
-  ['instructions', 'Special instructions'],
+  ['instructions', 'Additional information'],
 ];
 
 export default function RxDoctorEmail({ submission: s, drawingUrl, scanFileNames = [] }: Props) {
@@ -152,9 +152,9 @@ RxDoctorEmail.PreviewProps = {
     appliance: 'Hawley Retainer U/L',
     position: 'Upper',
     clasp: 'Adams Clasp',
-    spring: 'Spring',
+    spring: 'Spring - Specify Below',
     color: 'Purple',
-    instructions: 'Please add a bite plane.',
+    instructions: 'Please add a bite plane. Finger spring on UL2.',
   },
   drawingUrl: 'https://www.advancedortholabsf.com/mouth.png',
   scanFileNames: ['alex-doe-upper.stl', 'alex-doe-lower.ply'],

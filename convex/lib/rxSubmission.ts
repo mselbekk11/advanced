@@ -21,15 +21,21 @@ export const rxSubmissionSchema = z.object({
   appliance: z.enum(appliances as [string, ...string[]], 'Choose an appliance'),
   position: optionalChoice(positions),
   clasp: optionalChoice(clasps),
-  spring: optionalChoice(springs),
+  spring: z.enum(springs, 'Choose spring or no spring'),
   color: optionalChoice(colors),
-  instructions: z.string().trim().optional(),
+  // Shown to the doctor as "Additional information"; the stored key predates the rename.
+  instructions: z.string().trim().min(1, 'Additional information is required'),
 });
 
 export type RxSubmissionInput = z.infer<typeof rxSubmissionSchema>;
 
-// A stored submission. Rows saved before the due date became required may not have one.
-export type StoredRxSubmission = Omit<RxSubmissionInput, 'deliveryDate'> & { deliveryDate?: string };
+// A stored submission. Rows saved before the due date, spring and additional
+// information became required may not have them.
+export type StoredRxSubmission = Omit<RxSubmissionInput, 'deliveryDate' | 'spring' | 'instructions'> & {
+  deliveryDate?: string;
+  spring?: string;
+  instructions?: string;
+};
 
 // Ordered, human-readable labels for every field, used by the email template.
 export const rxFieldLabels: [keyof RxSubmissionInput, string][] = [
@@ -43,11 +49,11 @@ export const rxFieldLabels: [keyof RxSubmissionInput, string][] = [
   ['patient', 'Patient'],
   ['deliveryDate', 'Due date'],
   ['appliance', 'Appliance'],
-  ['position', 'Position'],
+  ['position', 'Arch'],
   ['clasp', 'Clasp'],
   ['spring', 'Spring'],
   ['color', 'Color'],
-  ['instructions', 'Special instructions'],
+  ['instructions', 'Additional information'],
 ];
 
 export function ownerRxSubject(input: Pick<RxSubmissionInput, 'patient' | 'last'>) {

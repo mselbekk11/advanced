@@ -116,7 +116,7 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
                 {springs.map((sp) => (
                   <CheckRow key={sp} name='spring' option={sp} checked={s.spring === sp} />
                 ))}
-                <SubHeading>Position</SubHeading>
+                <SubHeading>Arch</SubHeading>
                 {positions.map((p) => (
                   <CheckRow key={p} name='position' option={p} checked={s.position === p} />
                 ))}
@@ -161,10 +161,10 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
             </Row>
           </Section>
 
-          {/* Special instructions box */}
+          {/* Additional information box */}
           <Section style={{ padding: '4px 20px 16px' }}>
             <Section style={{ border: `2px solid ${purple}`, borderRadius: 8, padding: '8px 12px' }}>
-              <Text style={{ ...label, margin: 0 }}>SPECIAL INSTRUCTIONS:</Text>
+              <Text style={{ ...label, margin: 0 }}>ADDITIONAL INFORMATION:</Text>
               <Text style={{ ...value, margin: '6px 0 0', whiteSpace: 'pre-wrap' }} data-field='instructions'>
                 {s.instructions || '—'}
               </Text>
@@ -376,9 +376,9 @@ RxOwnerEmail.PreviewProps = {
     appliance: 'Hawley Retainer U/L',
     position: 'Upper',
     clasp: 'Adams Clasp',
-    spring: 'Spring',
+    spring: 'Spring - Specify Below',
     color: 'Purple',
-    instructions: 'Please add a bite plane.',
+    instructions: 'Please add a bite plane. Finger spring on UL2.',
   },
   scans: [
     {

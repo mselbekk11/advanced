@@ -12,9 +12,12 @@ describe('RxDoctorEmail', () => {
     const text = await render(<RxDoctorEmail {...props} />, { plainText: true });
     expect(text).toContain('Dear Dr. Smith');
     expect(text).toContain('Thank you for your order');
-    for (const v of ['Alex Doe', 'Oct 20, 2026', 'Hawley Retainer U/L', 'Upper', 'Adams Clasp', 'Spring', 'Purple', 'Please add a bite plane.']) {
+    for (const v of ['Alex Doe', 'Oct 20, 2026', 'Hawley Retainer U/L', 'Upper', 'Adams Clasp', 'Spring - Specify Below', 'Purple', 'Please add a bite plane. Finger spring on UL2.']) {
       expect(text).toContain(v);
     }
+    expect(text).toContain('Arch');
+    expect(text).toContain('Additional information');
+    expect(text).not.toMatch(/position|special instructions/i);
   });
 
   it('shows the drawing via its inline CID reference', async () => {

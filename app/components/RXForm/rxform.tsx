@@ -3,14 +3,29 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from 'convex/react';
 import { ConvexError } from 'convex/values';
-import { Download, FileText, Loader2, Palette } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Download,
+  FileText,
+  Loader2,
+  Palette,
+} from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useId, useRef, useState } from 'react';
 import { useForm, type FieldPath } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import {
   Dialog,
   DialogContent,
@@ -22,12 +37,18 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -40,10 +61,22 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
-import { applianceGroups, clasps, colors, positions, springs } from '@/convex/lib/rxOptions';
+import {
+  applianceGroups,
+  clasps,
+  colors,
+  NO_SPRING,
+  positions,
+  springs,
+} from '@/convex/lib/rxOptions';
 import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
+import { cn } from '@/lib/utils';
 import { ArchDrawing, type ArchDrawingHandle } from './ArchDrawing';
-import { ScanUpload, type ScanUploadHandle, type ScanUploadState } from './ScanUpload';
+import {
+  ScanUpload,
+  type ScanUploadHandle,
+  type ScanUploadState,
+} from './ScanUpload';
 
 type RxFormValues = z.input<typeof rxSubmissionSchema>;
 
@@ -60,7 +93,7 @@ const emptyValues: RxFormValues = {
   appliance: '',
   position: '',
   clasp: '',
-  spring: '',
+  spring: NO_SPRING,
   color: '',
   instructions: '',
 };
@@ -75,10 +108,32 @@ type TextFieldConfig = {
 };
 
 const textFields: TextFieldConfig[] = [
-  { name: 'first', label: 'First name', required: true, autoComplete: 'given-name' },
-  { name: 'last', label: 'Last name', required: true, autoComplete: 'family-name' },
-  { name: 'email', label: 'Email', required: true, type: 'email', autoComplete: 'email' },
-  { name: 'phone', label: 'Phone', required: true, type: 'tel', autoComplete: 'tel' },
+  {
+    name: 'first',
+    label: 'First name',
+    required: true,
+    autoComplete: 'given-name',
+  },
+  {
+    name: 'last',
+    label: 'Last name',
+    required: true,
+    autoComplete: 'family-name',
+  },
+  {
+    name: 'email',
+    label: 'Email',
+    required: true,
+    type: 'email',
+    autoComplete: 'email',
+  },
+  {
+    name: 'phone',
+    label: 'Phone',
+    required: true,
+    type: 'tel',
+    autoComplete: 'tel',
+  },
   { name: 'street', label: 'Street address', autoComplete: 'street-address' },
   { name: 'city', label: 'City', autoComplete: 'address-level2' },
   { name: 'zip', label: 'ZIP / postal code', autoComplete: 'postal-code' },
@@ -93,9 +148,24 @@ type SelectFieldConfig = {
 };
 
 const selectFields: SelectFieldConfig[] = [
-  { name: 'position', label: 'Position', placeholder: 'Upper / Lower / Both', options: positions },
-  { name: 'clasp', label: 'Clasp', placeholder: 'Choose a clasp', options: clasps },
-  { name: 'spring', label: 'Spring', placeholder: 'Spring or specify type', options: springs },
+  {
+    name: 'position',
+    label: 'Arch',
+    placeholder: 'Upper / Lower / Both',
+    options: positions,
+  },
+  {
+    name: 'clasp',
+    label: 'Clasp',
+    placeholder: 'Choose a clasp',
+    options: clasps,
+  },
+  {
+    name: 'spring',
+    label: 'Spring',
+    placeholder: 'Spring or no spring',
+    options: springs,
+  },
 ];
 
 function RequiredMark() {
@@ -112,8 +182,14 @@ export default function Rxform() {
   const generateUploadUrl = useMutation(api.rxSubmissions.generateUploadUrl);
   const drawingRef = useRef<ArchDrawingHandle>(null);
   const scansRef = useRef<ScanUploadHandle>(null);
-  const [scanState, setScanState] = useState<ScanUploadState>({ uploading: 0, failed: 0 });
-  const onScanStateChange = useCallback((state: ScanUploadState) => setScanState(state), []);
+  const [scanState, setScanState] = useState<ScanUploadState>({
+    uploading: 0,
+    failed: 0,
+  });
+  const onScanStateChange = useCallback(
+    (state: ScanUploadState) => setScanState(state),
+    [],
+  );
   const form = useForm<RxFormValues>({
     resolver: zodResolver(rxSubmissionSchema),
     defaultValues: emptyValues,
@@ -143,10 +219,13 @@ export default function Rxform() {
       // Surface server-side validation errors on the matching fields.
       const issues =
         err instanceof ConvexError
-          ? (err.data as { issues?: { path: string; message: string }[] }).issues
+          ? (err.data as { issues?: { path: string; message: string }[] })
+              .issues
           : undefined;
       issues?.forEach((issue) =>
-        form.setError(issue.path as FieldPath<RxFormValues>, { message: issue.message })
+        form.setError(issue.path as FieldPath<RxFormValues>, {
+          message: issue.message,
+        }),
       );
       // Problems not tied to a field (e.g. a rejected scan) go in the toast.
       const message =
@@ -155,7 +234,7 @@ export default function Rxform() {
           : undefined;
       toast.error(
         'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.',
-        { description: message }
+        { description: message },
       );
     }
   };
@@ -188,20 +267,17 @@ export default function Rxform() {
           </p>
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <PaperFormCallout />
+          <PaperFormCalloutThree />
           <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2 lg:items-start'>
-            <div className='bg-white flex flex-col items-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8 lg:sticky lg:top-8'>
+            <div className='bg-white flex flex-col items-center border-2 border-solid border-gray-200 rounded-lg p-8 lg:sticky lg:top-8'>
               <ArchDrawing ref={drawingRef} disabled={submitting} />
-              <div className='mt-8 w-full sm:w-auto'>
-                <ColorChartDialog />
-              </div>
             </div>
 
             <Form {...form}>
               <form
                 noValidate
                 onSubmit={form.handleSubmit(onSubmit)}
-                className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg space-y-6'
+                className='p-8 bg-white border-2 border-solid border-gray-200 rounded-lg space-y-6'
               >
                 <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                   {textFields.map((f) => (
@@ -239,7 +315,12 @@ export default function Rxform() {
                           <RequiredMark />
                         </FormLabel>
                         <FormControl>
-                          <Input type='date' min={today} {...field} value={field.value ?? ''} />
+                          <Input
+                            type='date'
+                            min={today}
+                            {...field}
+                            value={field.value ?? ''}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -255,7 +336,10 @@ export default function Rxform() {
                           Appliance
                           <RequiredMark />
                         </FormLabel>
-                        <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                        <Select
+                          value={field.value ?? ''}
+                          onValueChange={field.onChange}
+                        >
                           <FormControl>
                             <SelectTrigger onBlur={field.onBlur}>
                               <SelectValue placeholder='Choose an appliance' />
@@ -287,7 +371,10 @@ export default function Rxform() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{f.label}</FormLabel>
-                          <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                          <Select
+                            value={field.value ?? ''}
+                            onValueChange={field.onChange}
+                          >
                             <FormControl>
                               <SelectTrigger onBlur={field.onBlur}>
                                 <SelectValue placeholder={f.placeholder} />
@@ -301,6 +388,12 @@ export default function Rxform() {
                               ))}
                             </SelectContent>
                           </Select>
+                          {f.name === 'spring' && field.value !== NO_SPRING && (
+                            <FormDescription>
+                              Describe the spring in Additional information
+                              below.
+                            </FormDescription>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -311,22 +404,17 @@ export default function Rxform() {
                     control={form.control}
                     name='color'
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className='relative'>
                         <FormLabel>Appliance color</FormLabel>
-                        <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger onBlur={field.onBlur}>
-                              <SelectValue placeholder='Choose a color' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className='max-h-80'>
-                            {colors.map((color) => (
-                              <SelectItem key={color} value={color}>
-                                {color}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {/* Sits over the label row so the field lines up with its neighbours. */}
+                        <div className='absolute right-0 top-0 !mt-0'>
+                          <ColorChartDialog />
+                        </div>
+                        <ColorCombobox
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -338,11 +426,14 @@ export default function Rxform() {
                   name='instructions'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Special instructions</FormLabel>
+                      <FormLabel>
+                        Additional information
+                        <RequiredMark />
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           rows={4}
-                          placeholder='Anything else we should know, including details for "Other" selections'
+                          placeholder='Spring details, details for "Other" selections, and anything else we should know'
                           {...field}
                           value={field.value ?? ''}
                         />
@@ -355,9 +446,14 @@ export default function Rxform() {
                 <div className='space-y-2'>
                   <p className='text-sm font-medium leading-none'>Scans</p>
                   <p className='text-sm text-muted-foreground'>
-                    Optional. Attach intraoral scans, or send them with iTero (lab code 26235) or 3Shape.
+                    Optional. Attach intraoral scans, or send them with iTero
+                    (lab code 26235) or 3Shape.
                   </p>
-                  <ScanUpload ref={scansRef} disabled={submitting} onStateChange={onScanStateChange} />
+                  <ScanUpload
+                    ref={scansRef}
+                    disabled={submitting}
+                    onStateChange={onScanStateChange}
+                  />
                 </div>
 
                 {scansBlocking && (
@@ -365,7 +461,11 @@ export default function Rxform() {
                     {scansBlocking}
                   </p>
                 )}
-                <Button type='submit' className='w-full' disabled={submitting || !!scansBlocking}>
+                <Button
+                  type='submit'
+                  className='w-full'
+                  disabled={submitting || !!scansBlocking}
+                >
                   {submitting ? (
                     <>
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
@@ -384,20 +484,99 @@ export default function Rxform() {
   );
 }
 
+function ColorCombobox({
+  value,
+  onChange,
+  onBlur,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const listId = useId();
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) onBlur();
+      }}
+    >
+      <PopoverTrigger asChild>
+        <FormControl>
+          <button
+            type='button'
+            role='combobox'
+            aria-expanded={open}
+            aria-controls={listId}
+            className={cn(
+              'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+              !value && 'text-muted-foreground'
+            )}
+          >
+            <span className='line-clamp-1 text-left'>
+              {value || 'Choose a color'}
+            </span>
+            <ChevronDown className='h-4 w-4 shrink-0 opacity-50' />
+          </button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent
+        align='start'
+        id={listId}
+        className='w-[--radix-popover-trigger-width] p-0'
+      >
+        <Command>
+          <CommandInput placeholder='Search colors…' />
+          <CommandList>
+            <CommandEmpty>No color found.</CommandEmpty>
+            <CommandGroup>
+              {colors.map((color) => (
+                <CommandItem
+                  key={color}
+                  value={color}
+                  onSelect={() => {
+                    onChange(color);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      'h-4 w-4',
+                      value === color ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  {color}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function ColorChartDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='outline' className='w-full'>
-          <Palette className='mr-2 h-4 w-4' />
-          View Color Chart
-        </Button>
+        <button
+          type='button'
+          className='inline-flex items-center gap-1 text-sm font-medium leading-none text-indigo-600 hover:text-indigo-500 focus:outline-none focus-visible:underline'
+        >
+          <Palette className='h-3.5 w-3.5' />
+          View chart
+        </button>
       </DialogTrigger>
       <DialogContent className='max-w-4xl'>
         <DialogHeader>
           <DialogTitle>Appliance color chart</DialogTitle>
           <DialogDescription>
-            Pick a color with your patient, then choose it in the form.
+            Find the color name on the chart, then pick it from Appliance
+            color.
           </DialogDescription>
         </DialogHeader>
         <Image
@@ -421,16 +600,94 @@ function PaperFormCallout() {
           <FileText className='h-5 w-5' />
         </div>
         <div>
-          <p className='font-semibold text-gray-900'>Prefer paper? Download the RX form</p>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
           <p className='mt-1 text-sm text-gray-600'>
             Print it, fill it in by hand and send it with your case.
           </p>
         </div>
       </div>
-      <Button className='w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto' asChild>
+      <Button
+        className='w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        asChild
+      >
         <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
           <Download className='mr-2 h-4 w-4' />
           Download PDF
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+function PaperFormCalloutTwo() {
+  return (
+    <div className='relative flex flex-col gap-4 overflow-hidden rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-8 sm:flex-row sm:items-center sm:justify-between'>
+      {/* Oversized, faint logo bleeding off the left, top and bottom edges. */}
+      <Image
+        src='/AOL.svg'
+        alt=''
+        aria-hidden
+        width={386}
+        height={136}
+        className='pointer-events-none absolute -left-10 top-1/2 h-[180%] w-auto max-w-none -translate-y-[30%] select-none opacity-[0.07]'
+      />
+      <div className='relative flex items-start gap-4'>
+        {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div> */}
+        <div>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button
+        className='relative w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        asChild
+      >
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download PDF
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+function PaperFormCalloutThree() {
+  return (
+    <div className='relative flex flex-col gap-4 overflow-hidden rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-8 sm:flex-row sm:items-center sm:justify-between'>
+      {/* Faint logo tiled across the whole background. */}
+      <div
+        aria-hidden
+        className='pointer-events-none absolute inset-0 select-none bg-[url(/AOL.svg)] bg-[length:120px_auto] bg-repeat opacity-[0.04]'
+      />
+
+      <div className='relative flex items-start gap-4'>
+        {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div> */}
+        <div>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button
+        className='relative w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        asChild
+      >
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download Rx-Form
         </a>
       </Button>
     </div>

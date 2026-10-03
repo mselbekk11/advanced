@@ -9,6 +9,8 @@ const valid = {
   patient: 'Alex Doe',
   deliveryDate: '2026-10-20',
   appliance: 'Hawley Retainer U/L',
+  spring: 'No Spring',
+  instructions: 'Please add a bite plane.',
 };
 
 describe('rxSubmissionSchema', () => {
@@ -16,7 +18,7 @@ describe('rxSubmissionSchema', () => {
     expect(rxSubmissionSchema.safeParse(valid).success).toBe(true);
   });
 
-  it.each(['first', 'last', 'email', 'phone', 'patient', 'deliveryDate', 'appliance'] as const)(
+  it.each(['first', 'last', 'email', 'phone', 'patient', 'deliveryDate', 'appliance', 'spring', 'instructions'] as const)(
     'rejects a missing %s',
     (field) => {
       const result = rxSubmissionSchema.safeParse({ ...valid, [field]: '' });
@@ -26,6 +28,12 @@ describe('rxSubmissionSchema', () => {
 
   it('rejects whitespace-only required fields', () => {
     expect(rxSubmissionSchema.safeParse({ ...valid, patient: '   ' }).success).toBe(false);
+    expect(rxSubmissionSchema.safeParse({ ...valid, instructions: '   ' }).success).toBe(false);
+  });
+
+  it('accepts spring or no spring and rejects the old spring options', () => {
+    expect(rxSubmissionSchema.safeParse({ ...valid, spring: 'Spring - Specify Below' }).success).toBe(true);
+    expect(rxSubmissionSchema.safeParse({ ...valid, spring: 'Specify Type Below' }).success).toBe(false);
   });
 
   it('rejects an appliance that is not in the list', () => {
