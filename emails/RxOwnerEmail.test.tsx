@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@react-email/render';
 import { DRAWING_CID } from '../convex/lib/drawing';
 import { appliances, OTHER_APPLIANCE } from '../convex/lib/rxOptions';
-import RxOwnerEmail, { BLANK_ARCH_URL, formatDate } from './RxOwnerEmail';
+import RxOwnerEmail, { BLANK_ARCH_URL, formatDate, LOGO_URL } from './RxOwnerEmail';
 
 const sample = RxOwnerEmail.PreviewProps.submission;
 
@@ -47,6 +47,13 @@ describe('RxOwnerEmail', () => {
     expect(text).not.toMatch(/position|special instructions/i);
     expect(text).toContain('APPLIANCES PRESCRIPTION');
     expect(text).toContain('OVER 45 YEARS OF EXCELLENCE');
+  });
+
+  it('shows the lab logo as a PNG next to the name', async () => {
+    const html = await render(<RxOwnerEmail {...RxOwnerEmail.PreviewProps} />);
+    expect(LOGO_URL).toMatch(/^https:\/\/.+\.png$/);
+    expect(html).toContain(`src="${LOGO_URL}"`);
+    expect(html).toContain('SINCE 1982');
   });
 
   it('shows the blank arch by default', async () => {

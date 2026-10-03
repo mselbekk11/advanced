@@ -252,7 +252,7 @@ export default function Rxform() {
   }
 
   return (
-    <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-44 lg:pt-48'>
+    <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-24 lg:pt-48'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
           <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>

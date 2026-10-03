@@ -22,6 +22,10 @@ import { formatBytes } from '../convex/lib/scans';
 
 const SITE_URL = 'https://www.advancedortholabsf.com';
 export const BLANK_ARCH_URL = `${SITE_URL}/mouth.png`;
+// public/logo-png.png, hosted in the public Blob store so it loads before the
+// v2 cutover puts it on the production site.
+export const LOGO_URL = 'https://us3x6upisyj0hvfe.public.blob.vercel-storage.com/email/logo.png';
+const LOGO_SIZE = 64;
 
 const purple = '#5631c4';
 const purpleTint = '#efebfb';
@@ -56,12 +60,7 @@ export default function RxOwnerEmail({ submission, archImageUrl = BLANK_ARCH_URL
           <Section style={{ padding: '20px 20px 16px' }}>
             <Row>
               <Column style={{ width: '44%', verticalAlign: 'top', paddingRight: 12 }}>
-                <Text style={{ margin: 0, fontSize: 24, lineHeight: '26px', fontWeight: 800, color: '#111827' }}>
-                  Advanced
-                  <br />
-                  Ortho Lab
-                </Text>
-                <Text style={{ ...label, margin: '6px 0 10px', letterSpacing: 2 }}>SINCE 1982</Text>
+                <LabLogo />
                 <Text style={small}>1108 Vicente Street, Suite 102</Text>
                 <Text style={small}>San Francisco, CA 94116</Text>
                 <Text style={small}>(415) 661-9296</Text>
@@ -331,6 +330,43 @@ function Box({ checked }: { checked: boolean }) {
         </tr>
       </tbody>
     </table>
+  );
+}
+
+// Logo on the left; name and "since 1982" stacked to the logo's height, like the paper form.
+function LabLogo() {
+  const line = <div style={{ height: 1, lineHeight: '1px', fontSize: 1, backgroundColor: purple }}>&nbsp;</div>;
+  return (
+    <Row style={{ marginBottom: 10 }}>
+      <Column style={{ width: LOGO_SIZE, verticalAlign: 'middle', paddingRight: 10 }}>
+        <Img
+          src={LOGO_URL}
+          alt='Advanced Ortho Lab'
+          width={LOGO_SIZE}
+          height={LOGO_SIZE}
+          style={{ display: 'block', width: LOGO_SIZE, height: LOGO_SIZE }}
+        />
+      </Column>
+      {/* Shrinks to the name's width (the spacer column takes the rest), so the
+          logo lines up with the address below and the rules span the name. */}
+      <Column style={{ width: 1, whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+        <Text style={{ margin: 0, fontSize: 21, lineHeight: '23px', fontWeight: 800, color: '#111827' }}>
+          Advanced
+          <br />
+          Ortho Lab
+        </Text>
+        <Row style={{ marginTop: 4 }}>
+          <Column style={{ verticalAlign: 'middle' }}>{line}</Column>
+          <Column style={{ width: 1, whiteSpace: 'nowrap', verticalAlign: 'middle', padding: '0 6px' }}>
+            <Text style={{ ...label, margin: 0, fontSize: 10, lineHeight: '14px', letterSpacing: 1.5 }}>
+              SINCE 1982
+            </Text>
+          </Column>
+          <Column style={{ verticalAlign: 'middle' }}>{line}</Column>
+        </Row>
+      </Column>
+      <Column />
+    </Row>
   );
 }
 

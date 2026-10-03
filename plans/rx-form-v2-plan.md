@@ -79,7 +79,7 @@ These decisions apply to every phase:
   - To inspect stored files locally: `npx convex export --include-file-storage --path <zip>`.
   - `convex logs` streams forever; don't run it in the foreground.
   - Email previews: `npm run email` (React Email dev server on http://localhost:3001; `@react-email/ui` pulls its own Next 16/React 19, nested, so the site stays on Next 14/React 18).
-  - Email images must be absolute URLs and not SVG (Gmail). The blank arch loads from `https://www.advancedortholabsf.com/mouth.png` (production site; the Preview is behind login). The logo is a text wordmark. `RxOwnerEmail` takes an optional `archImageUrl` for phase 5's drawing.
+  - Email images must be absolute URLs and not SVG (Gmail). The blank arch loads from `https://www.advancedortholabsf.com/mouth.png` (production site; the Preview is behind login). The owner email's logo is `public/logo-png.png`, served from the public Blob store at `email/logo.png` (`LOGO_URL` in `RxOwnerEmail.tsx`) so it loads before cutover; re-upload it there if the PNG changes. The Blob orphan sweep only deletes `scanUploads` rows, so it won't touch it. `RxOwnerEmail` takes an optional `archImageUrl` for phase 5's drawing.
   - Template tests find checkbox state via `data-option="<field>:<option>"` / `data-checked` attributes on each row.
 
 ---
