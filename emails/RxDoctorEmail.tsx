@@ -18,6 +18,10 @@ import { formatDate } from './RxOwnerEmail';
 // summary, the drawing (if any) and the names of the attached scans. Scan
 // links are deliberately left out; only the lab gets those.
 
+// public/logo-full-png.png (386x136, shown at half size for sharp retina
+// rendering), hosted in the public Blob store like the owner email's logo.
+const FULL_LOGO_URL = 'https://us3x6upisyj0hvfe.public.blob.vercel-storage.com/email/logo-full.png';
+
 const purple = '#5631c4';
 const ink = '#1f2937';
 const muted = '#6b7280';
@@ -49,8 +53,14 @@ export default function RxDoctorEmail({ submission: s, drawingUrl, scanFileNames
       <Preview>{`We received your RX for ${s.patient}`}</Preview>
       <Body style={{ backgroundColor: '#f3f4f6', fontFamily: font, margin: 0, padding: '16px 0' }}>
         <Container style={{ maxWidth: 560, width: '100%', backgroundColor: '#ffffff' }}>
-          <Section style={{ backgroundColor: purple, padding: '16px 20px' }}>
-            <Text style={{ margin: 0, color: '#ffffff', fontSize: 20, fontWeight: 800 }}>Advanced Ortho Lab</Text>
+          <Section style={{ padding: '40px 20px 32px', borderBottom: `1px solid ${rule}` }}>
+            <Img
+              src={FULL_LOGO_URL}
+              alt='Advanced Ortho Lab'
+              width='193'
+              height='68'
+              style={{ display: 'block', margin: '0 auto', width: 193, height: 68 }}
+            />
           </Section>
 
           <Section style={{ padding: '20px 20px 8px' }}>

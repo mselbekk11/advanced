@@ -29,13 +29,14 @@ describe('RxDoctorEmail', () => {
   it('leaves the drawing out when nothing was drawn', async () => {
     const html = await render(<RxDoctorEmail submission={sample} />);
     expect(html).not.toContain('data-section="drawing"');
-    expect(html).not.toContain('<img');
+    expect(html.match(/<img/g)).toHaveLength(1); // just the logo
+    expect(html).toContain('email/logo-full.png');
   });
 
   it('names each scan without linking to it', async () => {
     const html = await render(<RxDoctorEmail {...props} />);
     for (const name of props.scanFileNames) expect(html).toContain(`data-scan="${name}"`);
-    expect(html).not.toContain('blob.vercel-storage.com');
+    expect(html).not.toContain('/scans/');
     expect(html).not.toMatch(/<a\s/);
   });
 

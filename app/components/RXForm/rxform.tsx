@@ -687,7 +687,7 @@ function PaperFormCalloutThree() {
       >
         <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
           <Download className='mr-2 h-4 w-4' />
-          Download Rx-Form
+          Download RX Form
         </a>
       </Button>
     </div>
