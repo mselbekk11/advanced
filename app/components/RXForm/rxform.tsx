@@ -1,597 +1,698 @@
 'use client';
 
-// import supabase from '@/app/config/supabaseClient';
-import { supabase } from '@/app/config/supabaseClient';
-
-import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { Download, Palette } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from 'convex/react';
+import { ConvexError } from 'convex/values';
+import {
+  Check,
+  ChevronDown,
+  Download,
+  FileText,
+  Loader2,
+  Palette,
+} from 'lucide-react';
+import Image from 'next/image';
+import { useCallback, useId, useRef, useState } from 'react';
+import { useForm, type FieldPath } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
-import { FormEvent, useState } from 'react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-// import { postData } from '@/app/utils/postData';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
+import {
+  applianceGroups,
+  clasps,
+  colors,
+  NO_SPRING,
+  positions,
+  springs,
+} from '@/convex/lib/rxOptions';
+import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
+import { cn } from '@/lib/utils';
+import { ArchDrawing, type ArchDrawingHandle } from './ArchDrawing';
+import {
+  ScanUpload,
+  type ScanUploadHandle,
+  type ScanUploadState,
+} from './ScanUpload';
+
+type RxFormValues = z.input<typeof rxSubmissionSchema>;
+
+const emptyValues: RxFormValues = {
+  first: '',
+  last: '',
+  email: '',
+  phone: '',
+  street: '',
+  city: '',
+  zip: '',
+  patient: '',
+  deliveryDate: '',
+  appliance: '',
+  position: '',
+  clasp: '',
+  spring: NO_SPRING,
+  color: '',
+  instructions: '',
+};
+
+type TextFieldConfig = {
+  name: FieldPath<RxFormValues>;
+  label: string;
+  required?: boolean;
+  type?: string;
+  autoComplete?: string;
+  placeholder?: string;
+};
+
+const textFields: TextFieldConfig[] = [
+  {
+    name: 'first',
+    label: 'First name',
+    required: true,
+    autoComplete: 'given-name',
+  },
+  {
+    name: 'last',
+    label: 'Last name',
+    required: true,
+    autoComplete: 'family-name',
+  },
+  {
+    name: 'email',
+    label: 'Email',
+    required: true,
+    type: 'email',
+    autoComplete: 'email',
+  },
+  {
+    name: 'phone',
+    label: 'Phone',
+    required: true,
+    type: 'tel',
+    autoComplete: 'tel',
+  },
+  { name: 'street', label: 'Street address', autoComplete: 'street-address' },
+  { name: 'city', label: 'City', autoComplete: 'address-level2' },
+  { name: 'zip', label: 'ZIP / postal code', autoComplete: 'postal-code' },
+  { name: 'patient', label: 'Patient', required: true, autoComplete: 'off' },
+];
+
+type SelectFieldConfig = {
+  name: FieldPath<RxFormValues>;
+  label: string;
+  placeholder: string;
+  options: readonly string[];
+};
+
+const selectFields: SelectFieldConfig[] = [
+  {
+    name: 'position',
+    label: 'Arch',
+    placeholder: 'Upper / Lower / Both',
+    options: positions,
+  },
+  {
+    name: 'clasp',
+    label: 'Clasp',
+    placeholder: 'Choose a clasp',
+    options: clasps,
+  },
+  {
+    name: 'spring',
+    label: 'Spring',
+    placeholder: 'Spring or no spring',
+    options: springs,
+  },
+];
+
+function RequiredMark() {
+  return (
+    <span aria-hidden className='text-destructive'>
+      {' '}
+      *
+    </span>
+  );
+}
 
 export default function Rxform() {
-  let currentDate = new Date().toJSON().slice(0, 10);
+  const submitRx = useMutation(api.rxSubmissions.submit);
+  const generateUploadUrl = useMutation(api.rxSubmissions.generateUploadUrl);
+  const drawingRef = useRef<ArchDrawingHandle>(null);
+  const scansRef = useRef<ScanUploadHandle>(null);
+  const [scanState, setScanState] = useState<ScanUploadState>({
+    uploading: 0,
+    failed: 0,
+  });
+  const onScanStateChange = useCallback(
+    (state: ScanUploadState) => setScanState(state),
+    [],
+  );
+  const form = useForm<RxFormValues>({
+    resolver: zodResolver(rxSubmissionSchema),
+    defaultValues: emptyValues,
+  });
+  const submitting = form.formState.isSubmitting;
+  const today = new Date().toISOString().slice(0, 10);
+  const scansBlocking =
+    scanState.uploading > 0
+      ? `Please wait for ${scanState.uploading === 1 ? 'your scan' : `${scanState.uploading} scans`} to finish uploading.`
+      : scanState.failed > 0
+        ? 'Retry or remove the scans that failed to upload.'
+        : null;
 
-  console.log(supabase);
-
-  const [first, setFirst] = useState('');
-  const [last, setLast] = useState('');
-  const [email, setEmail] = useState('');
-
-  const [street, setStreet] = useState('');
-  const [zip, setZip] = useState('');
-  const [city, setCity] = useState('');
-
-  const [phone, setPhone] = useState('');
-  const [patient, setPatient] = useState('');
-  const [date, setDate] = useState('');
-
-  const [appliance, setAppliance] = useState('');
-  const [position, setPosition] = useState('');
-  const [clasp, setClasp] = useState('');
-  const [spring, setSpring] = useState('');
-  const [color, setColor] = useState('');
-
-  const [message, setMessage] = useState('');
-
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    const { data, error } = await supabase.from('rxform').insert([
-      {
-        first,
-        last,
-        email,
-        street,
-        zip,
-        city,
-        phone,
-        patient,
-        date,
-        appliance,
-        position,
-        clasp,
-        spring,
-        color,
-        message,
-      },
-    ]);
-
-    if (error) {
-      console.log(error);
-    }
-    if (data) {
-      console.log(data);
-    }
-
-    console.log(
-      'Data',
-      first,
-      last,
-      email,
-      street,
-      zip,
-      city,
-      phone,
-      patient,
-      date,
-      appliance,
-      position,
-      clasp,
-      spring,
-      color,
-      message
-    );
-
+  const onSubmit = async (values: RxFormValues) => {
     try {
-      const res = await fetch('/api/rxform', {
-        method: 'POST',
-        body: JSON.stringify({
-          first,
-          last,
-          email,
-          street,
-          zip,
-          city,
-          phone,
-          patient,
-          date,
-          appliance,
-          position,
-          clasp,
-          spring,
-          color,
-          message,
+      const drawing = drawingRef.current?.hasDrawing()
+        ? await uploadDrawing(await drawingRef.current.exportPng())
+        : undefined;
+      const scans = scansRef.current?.scans() ?? [];
+      await submitRx({ ...rxSubmissionSchema.parse(values), drawing, scans });
+      form.reset(emptyValues);
+      drawingRef.current?.reset();
+      scansRef.current?.reset();
+      toast.success('Form sent! We will be in touch shortly!');
+    } catch (err) {
+      console.error('RX submission failed', err);
+      // Surface server-side validation errors on the matching fields.
+      const issues =
+        err instanceof ConvexError
+          ? (err.data as { issues?: { path: string; message: string }[] })
+              .issues
+          : undefined;
+      issues?.forEach((issue) =>
+        form.setError(issue.path as FieldPath<RxFormValues>, {
+          message: issue.message,
         }),
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
-
-      setFirst('');
-      setLast('');
-      setEmail('');
-      setStreet('');
-      setZip('');
-      setCity('');
-      setPhone('');
-      setPatient('');
-      setDate('');
-      setAppliance('');
-      setPosition('');
-      setClasp('');
-      setSpring('');
-      setColor('');
-      setMessage('');
-    } catch (err: any) {
-      console.log('Err', err);
+      );
+      // Problems not tied to a field (e.g. a rejected scan) go in the toast.
+      const message =
+        err instanceof ConvexError && !issues?.length
+          ? (err.data as { message?: string }).message
+          : undefined;
+      toast.error(
+        'Sorry, your RX form could not be sent. Please try again or call us at (415) 661-9296.',
+        { description: message },
+      );
     }
   };
 
-  const showToast = () => {
-    toast.success('Form sent! We will be in touch shortly!');
-  };
+  // Uploads the flattened drawing straight to Convex storage.
+  async function uploadDrawing(png: Blob) {
+    const res = await fetch(await generateUploadUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': png.type || 'image/png' },
+      body: png,
+    });
+    if (!res.ok) throw new Error(`Drawing upload failed (${res.status})`);
+    const { storageId } = (await res.json()) as { storageId: Id<'_storage'> };
+    return storageId;
+  }
 
   return (
-    <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-44 lg:pt-48'>
+    <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-24 lg:pt-48'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
-          <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
+          <p className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
             Please fill out and submit
-          </h2>
-          <p className='mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
-            RX Form
           </p>
+          <h1 className='mt-6 heading-1'>
+            RX Form
+          </h1>
           <p className='mt-6 text-lg leading-8 text-gray-600'>
             We use the highest quality Domestic and International materials,
             always at competitive prices
           </p>
         </div>
         <div className='mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none'>
-          <dl className='grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2'>
-            <div className='bg-white flex flex-col items-center justify-center border-2 border-solid border-[#DFE4EA] rounded-lg p-8'>
-              <Image
-                src='/mouth.png'
-                alt='teeth diagram'
-                width='400'
-                height='500'
-              />
-              <div className='mt-8 grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2'>
-                <a
-                  href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7J6b3uyMEHgFZOARtxbkeGYJsXWdj1zLyU42'
-                  target='_blank'
-                >
-                  <Button variant='outline' className='w-full'>
-                    <Download className='mr-2 h-4 w-4' />
-                    Download Form
-                  </Button>
-                </a>
-                <a
-                  href='https://uttkgexdc6.ufs.sh/f/l2Zi8yDbeJCS7XsraryMEHgFZOARtxbkeGYJsXWdj1zLyU42'
-                  target='_blank'
-                >
-                  <Button variant='outline' className='w-full'>
-                    <Palette className='mr-2 h-4 w-4' />
-                    View Color Chart
-                  </Button>
-                </a>
-              </div>
+          <PaperFormCalloutThree />
+          <div className='mt-8 grid grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2 lg:items-start'>
+            <div className='bg-white flex flex-col items-center border-2 border-solid border-gray-200 rounded-lg p-8 lg:sticky lg:top-8'>
+              <ArchDrawing ref={drawingRef} disabled={submitting} />
             </div>
-            <form method='POST' onSubmit={onSubmit}>
-              <div className='p-8 bg-white border-2 border-solid border-[#DFE4EA] rounded-lg'>
-                <div className='bg-white grid grid-cols-1 gap-x-8 gap-y-8 lg:max-w-none lg:grid-cols-2'>
-                  <input
-                    value={first}
-                    onChange={(e) => setFirst(e.target.value)}
-                    type='text'
-                    placeholder='First Name'
-                    name='firstname'
-                    id='firstname'
-                    autoComplete='given-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={last}
-                    onChange={(e) => setLast(e.target.value)}
-                    type='text'
-                    placeholder='Last Name'
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
-                    name='lastname'
-                    id='lastname'
-                    autoComplete='family-name'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    type='email'
-                    name='email'
-                    id='email'
-                    autoComplete='email'
-                    placeholder='Email'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    type='text'
-                    placeholder='Street address'
-                    name='streetaddress'
-                    id='street-address'
-                    autoComplete='street-address'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
-                    type='text'
-                    placeholder='ZIP or postal code (optional)'
-                    name='postalcode'
-                    id='postal-code'
-                    autoComplete='postal-code'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    type='text'
-                    placeholder='City'
-                    name='city'
-                    id='city'
-                    autoComplete='address-level2'
-                    required
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    type='tel'
-                    autoComplete='tel'
-                    placeholder='Phone'
-                    required
-                    name='phone'
-                    id='phone'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  <input
-                    value={patient}
-                    onChange={(e) => setPatient(e.target.value)}
-                    type='text'
-                    placeholder='Patient'
-                    required
-                    name='patient'
-                    id='patient'
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                  {/* <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <label htmlFor='date'>Pick up date</label>
-                    <input
-                      value={currentDate}
-                      onChange={(e) => setDate(e.target.value)}
-                      type='date'
-                      placeholder={currentDate}
-                      name='date'
-                      id='date'
-                      className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+
+            <Form {...form}>
+              <form
+                noValidate
+                onSubmit={form.handleSubmit(onSubmit)}
+                className='p-8 bg-white border-2 border-solid border-gray-200 rounded-lg space-y-6'
+              >
+                <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+                  {textFields.map((f) => (
+                    <FormField
+                      key={f.name}
+                      control={form.control}
+                      name={f.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {f.label}
+                            {f.required && <RequiredMark />}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type={f.type ?? 'text'}
+                              autoComplete={f.autoComplete}
+                              {...field}
+                              value={field.value ?? ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div> */}
+                  ))}
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={appliance}
-                      onChange={(e) => setAppliance(e.target.value)}
-                      id='appliance'
-                      name='appliance'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Choose an Appliance
-                      </option>
-                      <option value='Hawley Retainer U/L'>
-                        Hawley Retainer U/L
-                      </option>
-                      <option value='Hawley Retainer U/L 2X2 wire'>
-                        Hawley Retainer U/L 2X2 wire
-                      </option>
-                      <option value='Dugonni Retainer'>Dugonni Retainer</option>
-                      <option value='wraparound Retainer'>
-                        Wraparound Retainer
-                      </option>
-                      <option value='Modified Spring Retainer'>
-                        Modified Spring Retainer
-                      </option>
-                      <option value='Schwarz'>Schwarz</option>
-                      <option value='Nance Holding Arch'>
-                        Nance Holding Arch
-                      </option>
-                      <option value='Quad Helix Expansion W Arch'>
-                        Quad Helix Expansion W Arch
-                      </option>
-                      <option value='Hydrax Rapid Palatal Expander'>
-                        Hydrax Rapid Palatal Expander
-                      </option>
-                      <option value='Haas Palatal Seperator'>
-                        Haas Palatal Seperator
-                      </option>
-                      <option value='Bonded R.P.E'>Bonded R.P.E</option>
-                      <option value='Habit Crib'>Habit Crib</option>
-                      <option value='6x6 Lingualarch'>6x6 Lingualarch</option>
-                      <option value='Space Maintainer'>Space Maintainer</option>
-                      <option value='Horseshoe Splint (BRUXISM)'>
-                        Horseshoe Splint (BRUXISM)
-                      </option>
-                      <option value='Gelb/Mora'>Gelb/Mora</option>
-                      <option value='Invisible Retainer/Essex'>
-                        Invisible Retainer/Essex
-                      </option>
-                      <option value='Other - Specify Below'>
-                        Other - Specify Below
-                      </option>
-                    </select>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='deliveryDate'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Due date
+                          <RequiredMark />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type='date'
+                            min={today}
+                            {...field}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
-                      id='position'
-                      name='position'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Upper / Lower / Both
-                      </option>
-                      <option value='Upper'>Upper</option>
-                      <option value='Lower'>Lower</option>
-                      <option value='Both'>Both</option>
-                    </select>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='appliance'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Appliance
+                          <RequiredMark />
+                        </FormLabel>
+                        <Select
+                          value={field.value ?? ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger onBlur={field.onBlur}>
+                              <SelectValue placeholder='Choose an appliance' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {applianceGroups.map((group) => (
+                              <SelectGroup key={group.label}>
+                                <SelectLabel>{group.label}</SelectLabel>
+                                {group.items.map((item) => (
+                                  <SelectItem key={item} value={item}>
+                                    {item}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={clasp}
-                      onChange={(e) => setClasp(e.target.value)}
-                      id='clasp'
-                      name='clasp'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Choose a Clasp
-                      </option>
-                      <option value='Adams Clasp'>Adams Clasp</option>
-                      <option value='Ball Clasp'>Ball Clasp</option>
-                      <option value='C Clasp'>C Clasp</option>
-                      <option value='Other - Specify Below'>
-                        Other - Specify Below
-                      </option>
-                    </select>
-                  </div>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={spring}
-                      onChange={(e) => setSpring(e.target.value)}
-                      id='spring'
-                      name='spring'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Spring or Specify Type
-                      </option>
-                      <option value='Spring'>Spring</option>
-                      <option value='Specify Type Below'>
-                        Specify Type Below
-                      </option>
-                    </select>
-                  </div>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <select
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                      id='color'
-                      name='color'
-                      required
-                      className='w-full'
-                    >
-                      <option value='' disabled selected hidden>
-                        Appliance Color
-                      </option>
-                      <option value='Any'>Any</option>
-                      <option value='Wine'>Wine</option>
-                      <option value='Black Cherry'>Black Cherry</option>
-                      <option value='Fluoresent Pink'>Fluoresent Pink</option>
-                      <option value='Raspberry'>Raspberry</option>
-                      <option value='Cranberry'>Cranberry</option>
-                      <option value='Cherry'>Cherry</option>
-                      <option value='Route Beer Brown'>Route Beer Brown</option>
-                      <option value='Persimon'>Persimon</option>
-                      <option value='Tangerine'>Tangerine</option>
-                      <option value='Gold'>Gold</option>
-                      <option value='Amber'>Amber</option>
-
-                      <option value='Any'>Lemon Yellow</option>
-                      <option value='Fluorescent Yellow'>
-                        Fluorescent Yellow
-                      </option>
-                      <option value='Apple Green'>Apple Green</option>
-                      <option value='Grass Green'>Grass Green</option>
-                      <option value='Emerald Green'>Emerald Green</option>
-                      <option value='Teal Green'>Teal Green</option>
-                      <option value='Aqua Blue'>Aqua Blue</option>
-                      <option value='Turqouise'>Turqouise</option>
-                      <option value='Caribbean Blue'>Caribbean Blue</option>
-                      <option value='Ice Blue'>Ice Blue</option>
-                      <option value='Special Med Blue'>Special Med Blue</option>
-
-                      <option value='Saphire Blue'>Saphire Blue</option>
-                      <option value='Colbat Blue'>Colbat Blue</option>
-                      <option value='Light Prutple'>Light Prutple</option>
-                      <option value='Purple'>Purple</option>
-                      <option value='Light Violet'>Light Violet</option>
-                      <option value='Violet'>Violet</option>
-                      <option value='Black Onyx Liquid'>
-                        Black Onyx Liquid
-                      </option>
-                      <option value='Crystal Clear'>Crystal Clear</option>
-                      <option value='Standard Pink'>Standard Pink</option>
-                      <option value='Tinted Clear'>Tinted Clear</option>
-
-                      <option value='Luminary Red'>Luminary Red</option>
-                      <option value='Luminary Pink'>Luminary Pink</option>
-                      <option value='Luminary Coral Red'>
-                        Luminary Coral Red
-                      </option>
-                      <option value='Luminary Orange'>Luminary Orange</option>
-                      <option value='Luminary Blaze Yellow'>
-                        Luminary Blaze Yellow
-                      </option>
-                      <option value='Luminary Yellow'>Luminary Yellow</option>
-                      <option value='Luminary Green'>Luminary Green</option>
-                      <option value='Luminary Teal Green'>
-                        Luminary Teal Green
-                      </option>
-                      <option value='Luminary Blue'>Luminary Blue</option>
-                      <option value='Luminary Blueberry'>
-                        Luminary Blueberry
-                      </option>
-                      <option value='Luminary Purple'>Luminary Purple</option>
-                      <option value='Luminary Chartreuse'>
-                        Luminary Chartreuse
-                      </option>
-
-                      <option value='Royal Red'>Royal Red</option>
-                      <option value='Royal Pink'>Royal Pink</option>
-                      <option value='Royal Coral Red'>Royal Coral Red</option>
-                      <option value='Royal Orange'>Royal Orange</option>
-                      <option value='Royal Blaze Yellow'>
-                        Royal Blaze Yellow
-                      </option>
-                      <option value='Royal Yellow'>Royal Yellow</option>
-                      <option value='Royal Green'>Royal Green</option>
-                      <option value='Royal Teal Green'>Royal Teal Green</option>
-                      <option value='Royal Blue'>Royal Blue</option>
-                      <option value='Royal Blueberry'>Royal Blueberry</option>
-                      <option value='Royal Purple'>Royal Purple</option>
-
-                      <option value='Crimson Red'>Crimson Red</option>
-                      <option value='Candy Apple Red'>Candy Apple Red</option>
-                      <option value='Cameo Pink'>Cameo Pink</option>
-                      <option value='Sunriuse Orange'>Sunriuse Orange</option>
-                      <option value='Mustard Yellow'>Mustard Yellow</option>
-                      <option value='Banana Yellow'>Banana Yellow</option>
-                      <option value='Shamrock Green'>Shamrock Green</option>
-                      <option value='Fern Green'>Fern Green</option>
-                      <option value='Watermelon Green'>Watermelon Green</option>
-                      <option value='Sky Blue'>Sky Blue</option>
-
-                      <option value='Baby Blue'>Baby Blue</option>
-                      <option value='Lapis Blue'>Lapis Blue</option>
-                      <option value='Nautical Blue'>Nautical Blue</option>
-                      <option value='Amethyst'>Amethyst</option>
-                      <option value='Dove Gray'>Dove Gray</option>
-                      <option value='Dolphin Gray'>Dolphin Gray</option>
-                      <option value='Black Opaque'>Black Opaque</option>
-                      <option value='White Opaque'>White Opaque</option>
-                      <option value='Caramel Tan'>Caramel Tan</option>
-                      <option value='Chocolate Brown'>Chocolate Brown</option>
-
-                      <option value='Pink Pearl'>Pink Pearl</option>
-                      <option value='Peach Pearl'>Peach Pearl</option>
-                      <option value='Yellow Pearl'>Yellow Pearl</option>
-                      <option value='Green Pearl'>Green Pearl</option>
-                      <option value='Aqua Pearl'>Aqua Pearl</option>
-                      <option value='Blue Pearl'>Blue Pearl</option>
-                      <option value='Lavander Pearl'>Lavander Pearl</option>
-                      <option value='Lilac Pearl'>Lilac Pearl</option>
-                      <option value='Pearl White'>Pearl White</option>
-                      <option value='Midnight Black'>Midnight Black</option>
-
-                      <option value='Opalescent Sparkle'>
-                        Opalescent Sparkle
-                      </option>
-                      <option value='Silver Sparkle'>Silver Sparkle</option>
-                      <option value='Red Sparkle'>Red Sparkle</option>
-                      <option value='Golden Orange'>Golden Orange</option>
-                      <option value='Copper Sparkle'>Copper Sparkle</option>
-                      <option value='Salmon Pink'>Salmon Pink</option>
-                      <option value='Aztec Gold'>Aztec Gold</option>
-                      <option value='Kiwi Sparkle'>Kiwi Sparkle</option>
-                      <option value='Green Sparkle'>Green Sparkle</option>
-                      <option value='Hunter Green'>Hunter Green</option>
-                      <option value='Aqua Sparkle'>Aqua Sparkle</option>
-                      <option value='Crystal Blue'>Crystal Blue</option>
-                      <option value='Turquoise Sparkle'>
-                        Turquoise Sparkle
-                      </option>
-
-                      <option value='Blue Sparkle'>Blue Sparkle</option>
-                      <option value='Purple Sparkle'>Purple Sparkle</option>
-                      <option value='Lavender'>Lavender</option>
-                      <option value='Fuchsia'>Fuchsia</option>
-                      <option value='Black Sparkle'>Black Sparkle</option>
-                      <option value='Red Hatter'>Red Hatter</option>
-                      <option value='Tutti Frutti'>Tutti Frutti</option>
-                      <option value='Carnival Blue'>Carnival Blue</option>
-                      <option value='Miss Priss'>Miss Priss</option>
-                      <option value='Peacock'>Peacock</option>
-                      <option value='Pastel Rainbow'>Pastel Rainbow</option>
-                      <option value='Disco Rainbow'>Disco Rainbow</option>
-                      <option value='USA Sparkle'>USA Sparkle</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-2'>
-                  <label htmlFor='date' className='text-xs p-2'>
-                    Pick up date
-                  </label>
-                  <div className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
-                    <input
-                      value={currentDate}
-                      onChange={(e) => setDate(e.target.value)}
-                      type='date'
-                      placeholder={currentDate}
-                      name='date'
-                      id='date'
-                      className='block w-full'
+                  {selectFields.map((f) => (
+                    <FormField
+                      key={f.name}
+                      control={form.control}
+                      name={f.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{f.label}</FormLabel>
+                          <Select
+                            value={field.value ?? ''}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger onBlur={field.onBlur}>
+                                <SelectValue placeholder={f.placeholder} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {f.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {f.name === 'spring' && field.value !== NO_SPRING && (
+                            <FormDescription>
+                              Describe the spring in Additional information
+                              below.
+                            </FormDescription>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                </div>
+                  ))}
 
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    name='message'
-                    id='message'
-                    placeholder='Additional Information'
-                    rows={4}
-                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
+                  <FormField
+                    control={form.control}
+                    name='color'
+                    render={({ field }) => (
+                      <FormItem className='relative'>
+                        <FormLabel>Appliance color</FormLabel>
+                        {/* Sits over the label row so the field lines up with its neighbours. */}
+                        <div className='absolute right-0 top-0 !mt-0'>
+                          <ColorChartDialog />
+                        </div>
+                        <ColorCombobox
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                <div className='bg-white grid grid-cols-1 lg:max-w-none pt-8'>
-                  <Button type='submit' onClick={showToast}>
-                    Submit
-                  </Button>
+
+                <FormField
+                  control={form.control}
+                  name='instructions'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Additional information
+                        <RequiredMark />
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          rows={4}
+                          placeholder='Spring details, details for "Other" selections, and anything else we should know'
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className='space-y-2'>
+                  <p className='text-sm font-medium leading-none'>Scans</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Optional. Attach intraoral scans, or send them with iTero
+                    (lab code 26235) or 3Shape.
+                  </p>
+                  <ScanUpload
+                    ref={scansRef}
+                    disabled={submitting}
+                    onStateChange={onScanStateChange}
+                  />
                 </div>
-              </div>
-            </form>
-          </dl>
+
+                {scansBlocking && (
+                  <p role='status' className='text-sm text-muted-foreground'>
+                    {scansBlocking}
+                  </p>
+                )}
+                <Button
+                  type='submit'
+                  className='w-full'
+                  disabled={submitting || !!scansBlocking}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Sending…
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ColorCombobox({
+  value,
+  onChange,
+  onBlur,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const listId = useId();
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) onBlur();
+      }}
+    >
+      <PopoverTrigger asChild>
+        <FormControl>
+          <button
+            type='button'
+            role='combobox'
+            aria-expanded={open}
+            aria-controls={listId}
+            className={cn(
+              'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+              !value && 'text-muted-foreground'
+            )}
+          >
+            <span className='line-clamp-1 text-left'>
+              {value || 'Choose a color'}
+            </span>
+            <ChevronDown className='h-4 w-4 shrink-0 opacity-50' />
+          </button>
+        </FormControl>
+      </PopoverTrigger>
+      <PopoverContent
+        align='start'
+        id={listId}
+        className='w-[--radix-popover-trigger-width] p-0'
+      >
+        <Command>
+          <CommandInput placeholder='Search colors…' />
+          <CommandList>
+            <CommandEmpty>No color found.</CommandEmpty>
+            <CommandGroup>
+              {colors.map((color) => (
+                <CommandItem
+                  key={color}
+                  value={color}
+                  onSelect={() => {
+                    onChange(color);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      'h-4 w-4',
+                      value === color ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                  {color}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function ColorChartDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type='button'
+          className='inline-flex items-center gap-1 text-sm font-medium leading-none text-indigo-600 hover:text-indigo-500 focus:outline-none focus-visible:underline'
+        >
+          <Palette className='h-3.5 w-3.5' />
+          View chart
+        </button>
+      </DialogTrigger>
+      <DialogContent className='max-w-4xl'>
+        <DialogHeader>
+          <DialogTitle>Appliance color chart</DialogTitle>
+          <DialogDescription>
+            Find the color name on the chart, then pick it from Appliance
+            color.
+          </DialogDescription>
+        </DialogHeader>
+        <Image
+          src='/color-chart.jpeg'
+          alt='Appliance color chart'
+          width={4032}
+          height={3024}
+          sizes='(min-width: 1024px) 896px, 100vw'
+          className='h-auto w-full rounded-md'
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PaperFormCallout() {
+  return (
+    <div className='flex flex-col gap-4 rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-6 sm:flex-row sm:items-center sm:justify-between'>
+      <div className='flex items-start gap-4'>
+        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div>
+        <div>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button
+        variant='purple'
+        className='w-full shrink-0 sm:w-auto'
+        asChild
+      >
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download PDF
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+function PaperFormCalloutTwo() {
+  return (
+    <div className='relative flex flex-col gap-4 overflow-hidden rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-8 sm:flex-row sm:items-center sm:justify-between'>
+      {/* Oversized, faint logo bleeding off the left, top and bottom edges. */}
+      <Image
+        src='/AOL.svg'
+        alt=''
+        aria-hidden
+        width={386}
+        height={136}
+        className='pointer-events-none absolute -left-10 top-1/2 h-[180%] w-auto max-w-none -translate-y-[30%] select-none opacity-[0.07]'
+      />
+      <div className='relative flex items-start gap-4'>
+        {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div> */}
+        <div>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button
+        variant='purple'
+        className='relative w-full shrink-0 sm:w-auto'
+        asChild
+      >
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download PDF
+        </a>
+      </Button>
+    </div>
+  );
+}
+
+function PaperFormCalloutThree() {
+  return (
+    <div className='relative flex flex-col gap-4 overflow-hidden rounded-lg border-2 border-indigo-600/20 bg-indigo-50 p-8 sm:flex-row sm:items-center sm:justify-between'>
+      {/* Faint logo tiled across the whole background. */}
+      <div
+        aria-hidden
+        className='pointer-events-none absolute inset-0 select-none bg-[url(/AOL.svg)] bg-[length:120px_auto] bg-repeat opacity-[0.04]'
+      />
+
+      <div className='relative flex items-start gap-4'>
+        {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600'>
+          <FileText className='h-5 w-5' />
+        </div> */}
+        <div>
+          <p className='font-semibold text-gray-900'>
+            Prefer paper? Download the RX form
+          </p>
+          <p className='mt-1 text-sm text-gray-600'>
+            Print it, fill it in by hand and send it with your case.
+          </p>
+        </div>
+      </div>
+      <Button
+        variant='purple'
+        className='relative w-full shrink-0 sm:w-auto'
+        asChild
+      >
+        <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
+          <Download className='mr-2 h-4 w-4' />
+          Download RX Form
+        </a>
+      </Button>
     </div>
   );
 }

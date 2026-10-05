@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Heading scale: one h1 per page (page title), h2 for each section below it.
+   Same weight and colour, h2 one step smaller. */
+@layer components {
+  .heading-1 {
+    @apply text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl;
+  }
+  .heading-2 {
+    @apply text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

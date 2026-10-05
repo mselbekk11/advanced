@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-// import { Navbar } from './components/Navbar';
 import { NavbarTwo } from './components/NavbarTwo';
 import FooterTwo from './components/Home/FooterTwo';
-import { ToastContainer } from 'react-toastify';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
+import { ConvexClientProvider } from './ConvexClientProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,14 +22,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' className='scroll-smooth'>
       <body className={inter.className}>
-        {/* <Navbar /> */}
-        <ToastContainer />
-        <NavbarTwo />
-        {children}
-        <Analytics />
-        <FooterTwo />
+        <ConvexClientProvider>
+          <NavbarTwo />
+          {children}
+          <Analytics />
+          <FooterTwo />
+          <Toaster richColors position='top-right' />
+        </ConvexClientProvider>
       </body>
       {/* <Script
         src='https://www.sensai.co/widget/embed.js'

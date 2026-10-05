@@ -1,12 +1,5 @@
 'use client';
 
-// import {
-//   RegisterLink,
-//   LoginLink,
-//   LogoutLink,
-// } from '@kinde-oss/kinde-auth-nextjs/components';
-// import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -24,10 +17,6 @@ const navigation = [
 ];
 
 export function NavbarTwo() {
-  // const { isAuthenticated, getUser } = getKindeServerSession();
-  // const user = await getUser();
-  // user?.picture;
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (

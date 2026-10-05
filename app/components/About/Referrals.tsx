@@ -13,9 +13,9 @@ const Referrals = () => {
                 <span className='rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
                   Trusted Customer
                 </span>
-                <h1 className='mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl'>
+                <h2 className='mt-10 heading-2'>
                   Referrals
-                </h1>
+                </h2>
                 <p className='mt-6 text-md leading-8 text-slate-700'>
                   We are known for the Excellent Quality of our cases and we
                   have the Fastest TurnaroundTime in the area; “5 business days”

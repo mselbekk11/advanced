@@ -5,21 +5,21 @@ import Link from 'next/link';
 const features = [
   {
     name: 'Removable Appliances',
-    src: '/A.png',
+    src: '/removable-appliances.png',
     description:
       'Commodo nec sagittis tortor mauris sed. Turpis tortor quis scelerisque diam id accumsan nullam tempus. Pulvinar etiam lacus volutpat eu. Phasellus praesent ligula sit faucibus.',
     href: '#',
   },
   {
     name: 'Fixed Appliances',
-    src: '/B.png',
+    src: '/fixed-appliances.png',
     description:
       'Pellentesque enim a commodo malesuada turpis eleifend risus. Facilisis donec placerat sapien consequat tempor fermentum nibh.',
     href: '#',
   },
   {
     name: 'TMJ Appliances',
-    src: '/C.png',
+    src: '/tmj-appliances.png',
     description:
       'Pellentesque sit elit congue ante nec amet. Dolor aenean curabitur viverra suspendisse iaculis eget. Nec mollis placerat ultricies euismod ut condimentum.',
     href: '#',
@@ -31,12 +31,12 @@ export default function Appliances() {
     <div className='bg-[#f1f1f1] py-24 sm:py-32'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
-          <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
+          <p className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
             What we Offer
-          </h2>
-          <p className='mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
-            Orthodontic Appliances
           </p>
+          <h2 className='mt-6 heading-2'>
+            Orthodontic Appliances
+          </h2>
           <p className='mt-6 text-lg leading-8 text-gray-600'>
             We use the highest quality Domestic and International materials,
             always at competitive prices
@@ -54,8 +54,8 @@ export default function Appliances() {
                     <Image
                       src={feature.src}
                       alt='appliance'
-                      width='194'
-                      height='168'
+                      width='300'
+                      height='150'
                     />
                   </div>
                   <div className='flex items-center text-base font-semibold leading-7 text-gray-900 px-4 py-8 border-t-2 border-solid border-[#DFE4EA] w-full justify-center'>

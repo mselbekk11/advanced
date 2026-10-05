@@ -1,0 +1,79 @@
+/* eslint-disable */
+/**
+ * Generated `api` utility.
+ *
+ * THIS CODE IS AUTOMATICALLY GENERATED.
+ *
+ * To regenerate, run `npx convex dev`.
+ * @module
+ */
+
+import type * as contactMessages from "../contactMessages.js";
+import type * as crons from "../crons.js";
+import type * as emails from "../emails.js";
+import type * as http from "../http.js";
+import type * as lib_contactMessage from "../lib/contactMessage.js";
+import type * as lib_drawing from "../lib/drawing.js";
+import type * as lib_emailRouting from "../lib/emailRouting.js";
+import type * as lib_rxOptions from "../lib/rxOptions.js";
+import type * as lib_rxSubmission from "../lib/rxSubmission.js";
+import type * as lib_scans from "../lib/scans.js";
+import type * as resend from "../resend.js";
+import type * as rxSubmissions from "../rxSubmissions.js";
+import type * as scanUploads from "../scanUploads.js";
+import type * as scanUploadsNode from "../scanUploadsNode.js";
+import type * as storage from "../storage.js";
+
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
+
+declare const fullApi: ApiFromModules<{
+  contactMessages: typeof contactMessages;
+  crons: typeof crons;
+  emails: typeof emails;
+  http: typeof http;
+  "lib/contactMessage": typeof lib_contactMessage;
+  "lib/drawing": typeof lib_drawing;
+  "lib/emailRouting": typeof lib_emailRouting;
+  "lib/rxOptions": typeof lib_rxOptions;
+  "lib/rxSubmission": typeof lib_rxSubmission;
+  "lib/scans": typeof lib_scans;
+  resend: typeof resend;
+  rxSubmissions: typeof rxSubmissions;
+  scanUploads: typeof scanUploads;
+  scanUploadsNode: typeof scanUploadsNode;
+  storage: typeof storage;
+}>;
+
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
+export declare const api: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "public">
+>;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
+export declare const internal: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "internal">
+>;
+
+export declare const components: {
+  resend: import("@convex-dev/resend/_generated/component.js").ComponentApi<"resend">;
+};
