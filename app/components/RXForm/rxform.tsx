@@ -255,12 +255,12 @@ export default function Rxform() {
     <div className='bg-[#f1f1f1] pb-24 pt-36 lg:pb-24 lg:pt-48'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl lg:text-center'>
-          <h2 className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
+          <p className='inline-block rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
             Please fill out and submit
-          </h2>
-          <p className='mt-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
-            RX Form
           </p>
+          <h1 className='mt-6 heading-1'>
+            RX Form
+          </h1>
           <p className='mt-6 text-lg leading-8 text-gray-600'>
             We use the highest quality Domestic and International materials,
             always at competitive prices
@@ -609,7 +609,8 @@ function PaperFormCallout() {
         </div>
       </div>
       <Button
-        className='w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        variant='purple'
+        className='w-full shrink-0 sm:w-auto'
         asChild
       >
         <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
@@ -647,7 +648,8 @@ function PaperFormCalloutTwo() {
         </div>
       </div>
       <Button
-        className='relative w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        variant='purple'
+        className='relative w-full shrink-0 sm:w-auto'
         asChild
       >
         <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>
@@ -682,7 +684,8 @@ function PaperFormCalloutThree() {
         </div>
       </div>
       <Button
-        className='relative w-full shrink-0 bg-indigo-600 hover:bg-indigo-500 sm:w-auto'
+        variant='purple'
+        className='relative w-full shrink-0 sm:w-auto'
         asChild
       >
         <a href='/rx-form.pdf' download='advanced-ortho-lab-rx-form.pdf'>

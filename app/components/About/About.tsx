@@ -32,7 +32,7 @@ const About = () => {
           <div className='flex flex-wrap items-center -mx-4'>
             <div className='w-full px-4 lg:w-1/2'>
               <div className='mb-12 max-w-[540px] lg:mb-0'>
-                <h1 className='lg:mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl'>
+                <h1 className='lg:mt-10 heading-1'>
                   Proudly serving the Dental Community for <br />{' '}
                   <span className='text-indigo-600'>3 generations</span>
                 </h1>

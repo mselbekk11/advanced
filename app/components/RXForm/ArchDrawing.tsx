@@ -163,11 +163,11 @@ function ToolButton({
     <Button
       type='button'
       size='icon'
-      variant={active ? 'default' : 'outline'}
+      variant={active ? 'purple' : 'outline'}
       title={label}
       aria-label={label}
       aria-pressed={active}
-      className={cn('h-7 w-7', active && 'bg-indigo-600 hover:bg-indigo-500')}
+      className='h-7 w-7'
       {...props}
     >
       {children}

@@ -35,9 +35,7 @@ const DigitalPrinting = () => {
                 <span className='rounded-full bg-indigo-600/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10'>
                   What we Offer
                 </span>
-                <h1 className='mt-10 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl'>
-                  Digital Printing
-                </h1>
+                <h1 className='mt-10 heading-1'>Digital Printing</h1>
                 <p className='mt-6 text-md leading-8 text-slate-700'>
                   Advanced Ortho Lab uses Ortho Insight 3D software & Explore to
                   process your digital scans.
@@ -100,7 +98,7 @@ const DigitalPrinting = () => {
                   <div className='bg-[#4f4c7f] relative z-10 mb-4 flex items-center justify-center overflow-hidden py-12 px-6 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8 shadow-lg shadow-gray-500'>
                     <div>
                       <span className='block text-5xl font-extrabold text-white'>
-                        42
+                        44
                       </span>
                       {/* <span className='block text-base font-semibold text-white'>
                         We have
