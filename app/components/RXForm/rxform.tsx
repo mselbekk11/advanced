@@ -72,6 +72,7 @@ import {
 import { rxSubmissionSchema } from '@/convex/lib/rxSubmission';
 import { cn } from '@/lib/utils';
 import { ArchDrawing, type ArchDrawingHandle } from './ArchDrawing';
+import { DueDateInput } from './DueDateInput';
 import {
   ScanUpload,
   type ScanUploadHandle,
@@ -79,6 +80,19 @@ import {
 } from './ScanUpload';
 
 type RxFormValues = z.input<typeof rxSubmissionSchema>;
+
+// Today as YYYY-MM-DD in the doctor's own timezone.
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// In the browser, a typed due date also can't be in the past. (Not on the
+// server, whose "today" may be a different day in UTC.)
+const clientSchema = rxSubmissionSchema.refine(
+  (v) => !v.deliveryDate || v.deliveryDate >= localToday(),
+  { path: ['deliveryDate'], message: 'Choose today or a later date' },
+);
 
 const emptyValues: RxFormValues = {
   first: '',
@@ -191,11 +205,11 @@ export default function Rxform() {
     [],
   );
   const form = useForm<RxFormValues>({
-    resolver: zodResolver(rxSubmissionSchema),
+    resolver: zodResolver(clientSchema),
     defaultValues: emptyValues,
   });
   const submitting = form.formState.isSubmitting;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localToday();
   const scansBlocking =
     scanState.uploading > 0
       ? `Please wait for ${scanState.uploading === 1 ? 'your scan' : `${scanState.uploading} scans`} to finish uploading.`
@@ -315,8 +329,7 @@ export default function Rxform() {
                           <RequiredMark />
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type='date'
+                          <DueDateInput
                             min={today}
                             {...field}
                             value={field.value ?? ''}
@@ -580,10 +593,10 @@ function ColorChartDialog() {
           </DialogDescription>
         </DialogHeader>
         <Image
-          src='/color-chart.jpeg'
+          src='/colours.png'
           alt='Appliance color chart'
-          width={4032}
-          height={3024}
+          width={1008}
+          height={705}
           sizes='(min-width: 1024px) 896px, 100vw'
           className='h-auto w-full rounded-md'
         />
