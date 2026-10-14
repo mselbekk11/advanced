@@ -37,6 +37,11 @@ export default function RootLayout({
         data-chatbot-id='jh73gj33g6f5ct7esyrn1gfz7d87e8m5'
         strategy='afterInteractive'
       /> */}
+      <Script
+        async
+        src='http://localhost:3000/script.js'
+        data-site='advancedortholabsf.com'
+      ></Script>
       <Script src='https://scripts.simpleanalyticscdn.com/latest.js' />
     </html>
   );

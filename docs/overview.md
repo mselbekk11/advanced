@@ -9,7 +9,7 @@ The site has two jobs:
 
 There is no admin UI, no user accounts and no CMS. Marketing content is hard-coded in React components.
 
-> This describes the `v2` branch. Production (`main`) runs the old Mailgun/Supabase version until the phase 10 cutover in `plans/rx-form-v2-plan.md`.
+> v2 is live (merged into `main` on 2026-10-05). For what v2 changed, why, and what's still open, read `docs/v2-summary.md` first.
 
 ---
 
@@ -118,7 +118,7 @@ Hourly crons delete drawings and Blob scans that were uploaded but never submitt
 | Variable | Purpose |
 |---|---|
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | Sender, e.g. `Advanced Ortho Lab RX <onboarding@resend.dev>` in staging, `rx@advancedortholabsf.com` once the domain is verified |
+| `EMAIL_FROM` | Sender: `Advanced Ortho Lab RX <rx@advancedortholabsf.com>` in production; dev still uses `onboarding@resend.dev` |
 | `EMAIL_TO_OWNER` | The lab inbox (`advancedortholabsf@gmail.com`); receives orders and contact messages, and is the reply-to on doctor confirmations |
 | `EMAIL_OVERRIDE_TO` | **Staging only.** When set, every email (owner, doctor, contact) goes to this address instead and the subject is prefixed `[STAGING]`. Never set it in production. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob store token, for scan upload tokens, lookups and the sweep |
@@ -137,8 +137,8 @@ The old Mailgun, Supabase, Prisma and Kinde variables are no longer used.
 
 ## External services
 
-- **Convex** project `advanced-ortho-lab` (dev deployment used by the Preview; production deployment created at cutover).
-- **Resend** – domain `advancedortholabsf.com` to be verified at cutover; until then staging sends from `onboarding@resend.dev`, which only delivers to the Resend account owner (hence `EMAIL_OVERRIDE_TO`).
+- **Convex** project `advanced-ortho-lab`: dev `glad-mole-195` (local + Vercel Preview), production `zany-akita-445`.
+- **Resend** – domain `advancedortholabsf.com` verified (DNS in GoDaddy). Dev still sends from `onboarding@resend.dev`, which only delivers to the Resend account owner (hence `EMAIL_OVERRIDE_TO`).
 - **Vercel Blob** public store for scans. Links are permanent but unguessable.
 - Hero video streams from an external uploadthing URL; some decorative images are hot-linked from `i.ibb.co` and `tailwindui.com`.
 - Simple Analytics and Vercel Analytics.
@@ -149,7 +149,7 @@ The old Mailgun, Supabase, Prisma and Kinde variables are no longer used.
 
 - Change appliance/option lists only in `convex/lib/rxOptions.ts`; the form and emails both read it. The marketing catalogue (`Appliances/Appliances.tsx`, `Home/Appliances.tsx`) is separate copy.
 - Email images must be absolute URLs and not SVG (Gmail). Preview templates with `npm run email`.
-- Push Convex function changes with `npx convex dev --once` (dev) – the Vercel build does not deploy Convex yet.
+- Push Convex function changes with `npx convex dev --once` (dev) and `npx convex deploy` (production) – the Vercel build does not deploy Convex.
 - Scan links and drawings are patient health information; see the HIPAA note in `plans/rx-form-v2.md`.
 
 ---
