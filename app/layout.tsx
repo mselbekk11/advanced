@@ -39,7 +39,7 @@ export default function RootLayout({
       /> */}
       <Script
         async
-        src='https://analytics-afe7mf191-mselbekk11s-projects.vercel.app/script.js'
+        src='https://analytics-jet-zeta.vercel.app/script.js'
         data-site='advancedortholabsf.com'
       ></Script>
       <Script src='https://scripts.simpleanalyticscdn.com/latest.js' />
