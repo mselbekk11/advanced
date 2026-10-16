@@ -8,10 +8,11 @@ import {
 } from './scans';
 
 describe('scanContentType', () => {
-  it('maps .stl and .ply, case-insensitively', () => {
+  it('maps .stl, .ply and .pdf, case-insensitively', () => {
     expect(scanContentType('upper.stl')).toBe('model/stl');
     expect(scanContentType('LOWER.STL')).toBe('model/stl');
     expect(scanContentType('bite.ply')).toBe('model/x-ply');
+    expect(scanContentType('Report.PDF')).toBe('application/pdf');
   });
 
   it('rejects other or missing extensions', () => {
@@ -28,7 +29,7 @@ describe('scanFileProblem', () => {
   });
 
   it('rejects the wrong type', () => {
-    expect(scanFileProblem({ name: 'photo.jpg', size: 100 })).toMatch(/\.stl and \.ply/);
+    expect(scanFileProblem({ name: 'photo.jpg', size: 100 })).toMatch(/\.stl, \.ply and \.pdf/);
   });
 
   it('rejects empty files and files over 250 MB', () => {

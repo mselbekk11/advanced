@@ -85,7 +85,7 @@ const DigitalPrinting = () => {
                   <div className='bg-[#4f4c7f] relative z-10 mb-4 flex items-center justify-center overflow-hidden py-12 px-6 sm:mb-8 sm:h-[160px] sm:p-5 lg:mb-4 xl:mb-8 shadow-lg shadow-gray-500'>
                     <div>
                       <span className='block text-5xl font-extrabold text-white'>
-                        42
+                        44
                       </span>
                       {/* <span className='block text-base font-semibold text-white'>
                         We have

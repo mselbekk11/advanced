@@ -35,29 +35,31 @@ const Referrals = () => {
               <div className='grid grid-cols-1 w-full lg:grid-cols-2 text-sm leading-8 text-gray-600 italic rounded-lg border-2 border-solid border-[#DFE4EA] bg-[#fff]'>
                 <div className='flex flex-col lg:h-full p-4 border-b-2 lg:border-b-0 lg:border-r-2 border-solid border-[#DFE4EA] '>
                   <p>Image Orthodontics</p>
-                  <p>Choice Care</p>
-                  <p>Children&#39;s Choice Dental Care</p>
                   <p>Premier Orthodontics</p>
+                  <p>Ideal Dental Partners</p>
+                  <p>Choice Care</p>
+                  <p>Salt Dental Collective</p>
+                  <p>MBO Orthodontics</p>
                   <p>Axelrode Orthodontics</p>
-                  <p>Dr. Scott Chong DDS, MS</p>
-                  <p>Dr. Charlenne Rocha DDS, MSD</p>
-                  <p>Dr. Maureen Valley DMD, MPH, MS</p>
+                  <p>Dr. Yan Kalika DDS, MS</p>
                   <p>Dr. Bella Shen Garnett DDS, MS</p>
-                  <p>Dr. Elizabeth Ubaldo DDS</p>
-                  <p>Dr. Glen Young DDS</p>
+                  <p>Dr. Scott Chong DDS, MS</p>
+                  <p>Dr. Dovi Prero DDS, MS</p>
+                  <p>Dr. Rodney Lee DDS, MS</p>
                 </div>
 
                 <div className='flex flex-col lg:h-full p-4'>
-                  <p>Dr. Rodney Lee DDS</p>
-                  <p>Dr. Scott Lebus DDS, MS</p>
-                  <p>Dr. Winton J. Quock DMD</p>
-                  <p>Dr. Yan Kalika DDS, MS</p>
+                  <p>Dr. Charlenne Rocha DDS, MSD</p>
+                  <p>Dr. Greg Miller DDS, MS</p>
+                  <p>Dr. Helaine Kan DDS, MS</p>
+                  <p>Dr. Renie Ikeda DDS, MS</p>
+                  <p>Dr. Kathleen Tavarez DDS, MS</p>
+                  <p>Dr. Cameron L. Aboudara DDS, MS</p>
+                  <p>Dr. Daniel Hulme DDS, MS</p>
+                  <p>Dr. Michael Chang DDS, MS</p>
+                  <p>Dr. Elizabeth Ubaldo DDS, MS</p>
+                  <p>Dr. Leif Cobain DDS, MS</p>
                   <p>Dr. Peter Lee DDS, MS</p>
-                  <p>Dr. Alan Marcus DDS, MSD</p>
-                  <p>Dr. Michael Chang DDS</p>
-                  <p>Dr. Monica Chmiel DDS, MS</p>
-                  <p>Dr. Tony Cucalon DDS</p>
-                  <p>Dr. Kathleen Tavarez DDS</p>
                 </div>
               </div>
             </div>

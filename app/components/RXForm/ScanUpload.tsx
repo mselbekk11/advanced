@@ -159,7 +159,7 @@ export const ScanUpload = forwardRef<ScanUploadHandle, Props>(function ScanUploa
       >
         <Upload className='h-6 w-6 text-muted-foreground' />
         <p className='text-sm font-medium'>Drop scans here or click to choose files</p>
-        <p className='text-xs text-muted-foreground'>.stl or .ply, up to {formatBytes(MAX_SCAN_BYTES)} each</p>
+        <p className='text-xs text-muted-foreground'>.stl, .ply or .pdf, up to {formatBytes(MAX_SCAN_BYTES)} each</p>
         <input
           ref={inputRef}
           type='file'

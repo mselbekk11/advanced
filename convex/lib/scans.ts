@@ -9,10 +9,12 @@ export const MAX_SCANS = 20;
 
 // The browser uploads each scan with the content type for its extension
 // (browsers report "" or various types for .stl/.ply); the upload token only
-// allows that type.
+// allows that type. PDFs are accepted for doctors who send scan reports or
+// prescriptions as documents.
 export const SCAN_CONTENT_TYPES = {
   stl: 'model/stl',
   ply: 'model/x-ply',
+  pdf: 'application/pdf',
 } as const;
 
 export const SCAN_ACCEPT = Object.keys(SCAN_CONTENT_TYPES)
@@ -28,7 +30,7 @@ export function scanContentType(fileName: string) {
 
 // Returns why the picked file can't be uploaded as a scan, or null if it's fine.
 export function scanFileProblem(file: { name: string; size: number }) {
-  if (!scanContentType(file.name)) return 'Only .stl and .ply scan files can be uploaded';
+  if (!scanContentType(file.name)) return 'Only .stl, .ply and .pdf files can be uploaded';
   if (file.size === 0) return 'This file is empty';
   if (file.size > MAX_SCAN_BYTES) return `Scans must be ${formatBytes(MAX_SCAN_BYTES)} or smaller`;
   return null;
