@@ -134,7 +134,7 @@ Convex environment variables are set per deployment with `npx convex env set [--
 **Owner decisions**
 
 - [ ] **HIPAA / BAAs.** Scans, drawings and patient names are health information, and scan links are public (if unguessable). Whether HIPAA applies, and whether Convex and Resend BAAs are needed, has not been recorded.
-- [ ] Homepage "42 Years of experience" card vs. the "Over 44 years" badge (`DigitalPrintingThree.tsx`).
+- [x] Homepage "42 Years of experience" card vs. the "Over 44 years" badge (`DigitalPrintingThree.tsx`): changed to 44 on 2026-10-16.
 
 **Cleanup due after the quiet period (about 2026-10-20)**
 
